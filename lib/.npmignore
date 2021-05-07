@@ -1,0 +1,8 @@
+.gitignore
+jasmine.json
+package-lock.json
+tsconfig.json
+specs
+src
+.github
+.nyc_output

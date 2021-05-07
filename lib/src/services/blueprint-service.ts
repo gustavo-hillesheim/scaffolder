@@ -1,0 +1,39 @@
+import {
+  Blueprint,
+  Directory,
+  DirectoryBlueprint,
+  File,
+  FileBlueprint,
+  FSItem,
+  ProjectBlueprint,
+} from "../types";
+import { FileReader } from "../components/file-reader";
+import { createBlueprint } from "../utils";
+
+export class BlueprintService {
+  constructor(
+    private readonly fileReader: FileReader,
+    private readonly blueprintsRootDirectory: string
+  ) {}
+
+  async loadBlueprint(blueprintName: string): Promise<ProjectBlueprint> {
+    const files = await this.fileReader.readAll(
+      `${this.blueprintsRootDirectory}\\${blueprintName}`,
+      {
+        recursive: true,
+        readContents: true,
+      }
+    );
+    return { items: files.map(createBlueprint) };
+  }
+
+  async listBlueprints(): Promise<string[]> {
+    return this.fileReader
+      .listAll(this.blueprintsRootDirectory, {
+        recursive: false,
+      })
+      .then((files) =>
+        files.filter((file) => file instanceof Directory).map((file) => file.absolutePath)
+      );
+  }
+}

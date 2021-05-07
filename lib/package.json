@@ -1,0 +1,46 @@
+{
+  "name": "scaffolder",
+  "version": "0.0.1",
+  "description": "A package that helps creating directories and files out of templates. Useful for creating a initial project setup, or complex components in big projects.",
+  "author": "Gustavo.Hillesheim",
+  "repository": "https://github.com/gustavo-hillesheim/scaffolder",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "license": "MIT",
+  "files": [
+    "build"
+  ],
+  "keywords": [
+    "scaffold",
+    "scaffolding",
+    "generate",
+    "templates",
+    "template",
+    "project setup",
+    "ng generate",
+    "dart create"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node src/index.ts",
+    "cli": "ts-node src/cli/cli.ts",
+    "test": "ts-node node_modules/jasmine/bin/jasmine --config=jasmine.json",
+    "test:watch": "nodemon --watch src --watch specs --exec \"npm run test\" -e ts",
+    "coverage": "nyc -r text -e .ts --include src -x \"specs/*.spec.ts\" -x \"src/di.ts\" npm run test",
+    "coverage:html": "nyc -r html -e .ts --include src -x \"specs/*.spec.ts\" -x \"src/di.ts\" npm run test",
+    "deploy:local": "npm link"
+  },
+  "devDependencies": {
+    "@types/jasmine": "^3.6.11",
+    "@types/node": "^15.0.2",
+    "jasmine": "^3.7.0",
+    "jasmine-node": "^3.0.0",
+    "nodemon": "^2.0.7",
+    "nyc": "^15.1.0",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.4"
+  },
+  "dependencies": {
+    "minimal-di": "^1.0.1"
+  }
+}
