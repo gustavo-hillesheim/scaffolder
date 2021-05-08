@@ -1,12 +1,4 @@
-import {
-  Blueprint,
-  Directory,
-  DirectoryBlueprint,
-  File,
-  FileBlueprint,
-  FSItem,
-  ProjectBlueprint,
-} from "../types";
+import { Directory, ProjectBlueprint } from "../types";
 import { FileReader } from "../components/file-reader";
 import { createBlueprint } from "../utils";
 
@@ -32,8 +24,6 @@ export class BlueprintService {
       .listAll(this.blueprintsRootDirectory, {
         recursive: false,
       })
-      .then((files) =>
-        files.filter((file) => file instanceof Directory).map((file) => file.absolutePath)
-      );
+      .then((files) => files.filter((file) => file instanceof Directory).map((file) => file.path));
   }
 }

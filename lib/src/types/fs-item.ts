@@ -1,11 +1,11 @@
 export interface FSItem {
-  absolutePath: string;
+  path: string;
 }
 
 export class File implements FSItem {
-  constructor(public readonly absolutePath: string, public readonly content?: string) {}
+  constructor(public readonly path: string, public readonly content?: string) {}
 }
 
 export class Directory implements FSItem {
-  constructor(public readonly absolutePath: string, public readonly children?: FSItem[]) {}
+  constructor(public readonly path: string, public readonly children?: FSItem[]) {}
 }

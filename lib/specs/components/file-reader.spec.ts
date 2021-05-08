@@ -8,7 +8,7 @@ describe("FileReader", () => {
   beforeEach(() => {
     listFilesInDirectoryFn = jasmine.createSpy("ListFilesInDirectoryFn");
     readFileFn = jasmine.createSpy("ReadFileFn");
-    fileReader = new FileReader(listFilesInDirectoryFn, readFileFn);
+    fileReader = new FileReader(readFileFn, listFilesInDirectoryFn);
   });
 
   describe("#listAll", () => {
