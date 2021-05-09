@@ -2,7 +2,7 @@ import { normalize, sep } from "path";
 import { Directory, ProjectBlueprint, FileBlueprint, DirectoryBlueprint, File } from "../types";
 import { FileWriter } from "../components/file-writer";
 
-export class ScaffolderService {
+export class ScaffoldingService {
   constructor(private readonly fileWriter: FileWriter) {}
 
   async build(buildDefinition: BuildDefinition): Promise<void> {

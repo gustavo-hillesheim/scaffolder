@@ -1,8 +1,8 @@
 import {
   BlueprintService,
   createBlueprintService,
-  createScaffolderService,
-  ScaffolderService,
+  createScaffoldingService,
+  ScaffoldingService,
   createFileReader,
   createFileWriter,
   FileWriter,
@@ -10,11 +10,11 @@ import {
 } from "../src";
 
 describe("index", () => {
-  it("should create a ScaffolderService instance", () => {
-    const scaffolder = createScaffolderService();
+  it("should create a ScaffoldingService instance", () => {
+    const scaffolder = createScaffoldingService();
 
     expect(scaffolder).toBeTruthy();
-    expect(scaffolder).toBeInstanceOf(ScaffolderService);
+    expect(scaffolder).toBeInstanceOf(ScaffoldingService);
   });
 
   it("should create a BlueprintService instance", () => {

@@ -1,14 +1,14 @@
 import { diContainer } from "./di";
 import { FileReader, FileWriter } from "./components";
-import { BlueprintService, ScaffolderService } from "./services";
+import { BlueprintService, ScaffoldingService } from "./services";
 
 export * from "./components";
 export * from "./services";
 export * from "./types";
 export * from "./utils";
 
-export function createScaffolderService(): ScaffolderService {
-  return diContainer.get(ScaffolderService);
+export function createScaffoldingService(): ScaffoldingService {
+  return diContainer.get(ScaffoldingService);
 }
 
 export function createFileReader(): FileReader {

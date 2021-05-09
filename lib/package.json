@@ -1,9 +1,9 @@
 {
-  "name": "scaffolder",
+  "name": "@gus_hill/scaffolding",
   "version": "0.0.1",
   "description": "A package that helps creating directories and files out of templates. Useful for creating a initial project setup, or complex components in big projects.",
   "author": "Gustavo.Hillesheim",
-  "repository": "https://github.com/gustavo-hillesheim/scaffolder",
+  "repository": "https://github.com/gustavo-hillesheim/scaffolding",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "license": "MIT",
@@ -28,7 +28,8 @@
     "test:watch": "nodemon --watch src --watch specs --exec \"npm run test\" -e ts",
     "coverage": "nyc -r text -e .ts --include src -x \"specs/*.spec.ts\" -x \"src/di.ts\" npm run test",
     "coverage:html": "nyc -r html -e .ts --include src -x \"specs/*.spec.ts\" -x \"src/di.ts\" npm run test",
-    "deploy:local": "npm link"
+    "deploy:local": "npm link",
+    "deploy": "npm run build && npm publish --access public"
   },
   "devDependencies": {
     "@types/jasmine": "^3.6.11",

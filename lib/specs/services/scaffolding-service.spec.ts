@@ -1,5 +1,5 @@
 import {
-  ScaffolderService,
+  ScaffoldingService,
   FileWriter,
   File,
   FileBlueprint,
@@ -8,13 +8,13 @@ import {
   Blueprint,
 } from "../../src";
 
-describe("ScaffolderService", () => {
-  let scaffolderService: ScaffolderService;
+describe("ScaffoldingService", () => {
+  let scaffolderService: ScaffoldingService;
   let fileWriter: FileWriter;
 
   beforeEach(() => {
     fileWriter = jasmine.createSpyObj("FileWriter", ["createFile", "createDirectory"]);
-    scaffolderService = new ScaffolderService(fileWriter);
+    scaffolderService = new ScaffoldingService(fileWriter);
   });
 
   it("should create simple file", async () => {

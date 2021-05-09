@@ -1,2 +1,2 @@
 export * from "./blueprint-service";
-export * from "./scaffolder-service";
+export * from "./scaffolding-service";

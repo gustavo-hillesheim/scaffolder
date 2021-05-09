@@ -3,6 +3,7 @@ jasmine.json
 package-lock.json
 tsconfig.json
 specs
+coverage
 src
 .github
 .nyc_output
