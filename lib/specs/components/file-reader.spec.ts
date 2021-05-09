@@ -1,137 +1,84 @@
-import { Directory, File, FileReader, FSItem } from "../../src";
+import { sep } from "path";
+import { Directory, File, FileReader } from "../../src";
+import { RESOURCES_FOLDER } from "../constants";
 
 describe("FileReader", () => {
   let fileReader: FileReader;
-  let listFilesInDirectoryFn: jasmine.Spy<(path: string) => Promise<FSItem[]>>;
-  let readFileFn: jasmine.Spy<(path: string) => Promise<string>>;
+  const baseResourcesDirPath = `${RESOURCES_FOLDER}${sep}file-reader`;
+  const sampleDirPath = `${baseResourcesDirPath}${sep}sample_dir`;
+
+  function pathToResource(...pathSegments: string[]): string {
+    let path = sampleDirPath;
+    for (const pathSegment of pathSegments) {
+      path += sep + pathSegment;
+    }
+    return path;
+  }
 
   beforeEach(() => {
-    listFilesInDirectoryFn = jasmine.createSpy("ListFilesInDirectoryFn");
-    readFileFn = jasmine.createSpy("ReadFileFn");
-    fileReader = new FileReader(readFileFn, listFilesInDirectoryFn);
+    fileReader = new FileReader();
   });
 
   describe("#listAll", () => {
-    it("should list all files in one-layered directory", async () => {
-      listFilesInDirectoryFn.and.returnValue(Promise.resolve(sampleFakeDirectoryFiles));
-      const files = await fileReader.listAll("C:\\fake_directory");
-
-      expect(listFilesInDirectoryFn).toHaveBeenCalledOnceWith("C:\\fake_directory");
-      expect(files).toEqual(sampleFakeDirectoryFiles);
-    });
-
-    it("should list all files in two-layered directory and sub-directories", async () => {
-      listFilesInDirectoryFn.and.returnValues(
-        Promise.resolve(sampleRootDirectoryFiles),
-        Promise.resolve(sampleSrcDirectoryFiles)
-      );
-      const files = await fileReader.listAll("C:\\fake_dir", {
-        recursive: true,
-      });
-
-      expect(listFilesInDirectoryFn).toHaveBeenCalledWith("C:\\fake_dir");
-      expect(listFilesInDirectoryFn).toHaveBeenCalledWith("C:\\fake_dir\\src");
-      expect(files).toEqual(sampleRootDirectoryFilesWithChildren);
-    });
-
-    it("should list all files in two-layered directory and not sub-directories", async () => {
-      listFilesInDirectoryFn.and.returnValues(
-        Promise.resolve(sampleRootDirectoryFiles),
-        Promise.resolve(sampleSrcDirectoryFiles)
-      );
-      const files = await fileReader.listAll("C:\\fake_dir", {
+    it("should list all files in directory without sub-directories", async () => {
+      const files = await fileReader.listAll(sampleDirPath, {
         recursive: false,
       });
+      expect(files).toEqual([
+        new Directory(pathToResource("empty_dir")),
+        new File(pathToResource("empty_file.txt")),
+        new Directory(pathToResource("internal_dir")),
+        new File(pathToResource("sample_file.txt")),
+      ]);
+    });
 
-      expect(listFilesInDirectoryFn).toHaveBeenCalledOnceWith("C:\\fake_dir");
-      expect(files).toEqual(sampleRootDirectoryFiles);
+    it("should list all files in directory with sub-directories", async () => {
+      const files = await fileReader.listAll(sampleDirPath, {
+        recursive: true,
+      });
+      expect(files).toEqual([
+        new Directory(pathToResource("empty_dir")),
+        new File(pathToResource("empty_file.txt")),
+        new Directory(pathToResource("internal_dir"), [
+          new File(pathToResource("internal_dir", "internal_file.txt")),
+        ]),
+        new File(pathToResource("sample_file.txt")),
+      ]);
+    });
+
+    it("should throw error when listing non-existing directory", async () => {
+      await expectAsync(fileReader.listAll(pathToResource("non_existing_dir"))).toBeRejected();
     });
   });
 
   describe("#readAll", () => {
-    it("should read all files in one-layered directory", async () => {
-      listFilesInDirectoryFn.and.returnValue(Promise.resolve(sampleFakeDirectoryFiles));
-      const files = await fileReader.readAll("C:\\fake_directory");
+    it("should read all files in directory and their content", async () => {
+      const files = await fileReader.readAll(sampleDirPath);
 
-      expect(listFilesInDirectoryFn).toHaveBeenCalledOnceWith("C:\\fake_directory");
-      expect(files).toEqual(sampleFakeDirectoryFiles);
+      expect(files).toEqual([
+        new Directory(pathToResource("empty_dir")),
+        new File(pathToResource("empty_file.txt")),
+        new Directory(pathToResource("internal_dir")),
+        new File(pathToResource("sample_file.txt"), "This is a Sample File"),
+      ]);
     });
 
-    it("should read all files in two-layered directory and sub-directories", async () => {
-      listFilesInDirectoryFn.and.returnValues(
-        Promise.resolve(sampleRootDirectoryFiles),
-        Promise.resolve(sampleSrcDirectoryFiles)
-      );
-      const files = await fileReader.readAll("C:\\fake_dir", {
+    it("should read all files in directory and sub-directories and their content", async () => {
+      const files = await fileReader.readAll(sampleDirPath, {
         recursive: true,
       });
-
-      expect(listFilesInDirectoryFn).toHaveBeenCalledWith("C:\\fake_dir");
-      expect(listFilesInDirectoryFn).toHaveBeenCalledWith("C:\\fake_dir\\src");
-      expect(files).toEqual(sampleRootDirectoryFilesWithChildren);
+      expect(files).toEqual([
+        new Directory(pathToResource("empty_dir")),
+        new File(pathToResource("empty_file.txt")),
+        new Directory(pathToResource("internal_dir"), [
+          new File(pathToResource("internal_dir", "internal_file.txt"), "This is an Internal File"),
+        ]),
+        new File(pathToResource("sample_file.txt"), "This is a Sample File"),
+      ]);
     });
 
-    it("should read all files in one-layered directory and their content", async () => {
-      listFilesInDirectoryFn.and.callFake(() => Promise.resolve(sampleRootDirectoryFiles));
-      readFileFn.and.returnValue(Promise.resolve(packageJsonWithContent.content!));
-
-      const files = await fileReader.readAll("C:\\fake_dir", {
-        readContents: true,
-      });
-
-      expect(listFilesInDirectoryFn).toHaveBeenCalledWith("C:\\fake_dir");
-      expect(readFileFn).toHaveBeenCalledWith("C:\\fake_dir\\package.json");
-      expect(files).toEqual(sampleRootDirectoryFilesWithContent);
-    });
-
-    it("should read all files in two-layered directory and sub-directories and their content", async () => {
-      listFilesInDirectoryFn.and.returnValues(
-        Promise.resolve(sampleRootDirectoryFiles),
-        Promise.resolve(sampleSrcDirectoryFilesWithContent)
-      );
-      readFileFn.and.returnValues(
-        Promise.resolve(packageJsonWithContent.content!),
-        Promise.resolve(indexJsWithContent.content!)
-      );
-
-      const files = await fileReader.readAll("C:\\fake_dir", {
-        recursive: true,
-        readContents: true,
-      });
-
-      expect(listFilesInDirectoryFn).toHaveBeenCalledWith("C:\\fake_dir");
-      expect(listFilesInDirectoryFn).toHaveBeenCalledWith("C:\\fake_dir\\src");
-      expect(readFileFn).toHaveBeenCalledWith("C:\\fake_dir\\package.json");
-      expect(readFileFn).toHaveBeenCalledWith("C:\\fake_dir\\src\\index.js");
-      expect(files).toEqual(sampleRootDirectoryFilesWithChildrenAndContent);
+    it("should throw error when listing non-existing directory", async () => {
+      await expectAsync(fileReader.readAll(pathToResource("non_existing_dir"))).toBeRejected();
     });
   });
 });
-
-const sampleFakeDirectoryFiles = [
-  new File("C:\\fake_directory\\fake_file.txt"),
-  new Directory("C:\\fake_directory\\internal_directory"),
-];
-const sampleRootDirectoryFiles = [
-  new File("C:\\fake_dir\\package.json"),
-  new Directory("C:\\fake_dir\\src"),
-];
-const packageJsonWithContent = new File("C:\\fake_dir\\package.json", "{ 'name': 'scaffolding' }");
-const sampleRootDirectoryFilesWithContent = [
-  packageJsonWithContent,
-  new Directory("C:\\fake_dir\\src"),
-];
-const indexJsWithContent = new File(
-  "C:\\fake_dir\\src\\index.js",
-  "console.log('You are scaffolding');"
-);
-const sampleSrcDirectoryFiles = [new File("C:\\fake_dir\\src\\index.js")];
-const sampleSrcDirectoryFilesWithContent = [indexJsWithContent];
-const sampleRootDirectoryFilesWithChildren = [
-  new File("C:\\fake_dir\\package.json"),
-  new Directory("C:\\fake_dir\\src", sampleSrcDirectoryFiles),
-];
-const sampleRootDirectoryFilesWithChildrenAndContent = [
-  packageJsonWithContent,
-  new Directory("C:\\fake_dir\\src", sampleSrcDirectoryFilesWithContent),
-];

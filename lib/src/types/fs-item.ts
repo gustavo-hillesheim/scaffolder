@@ -7,5 +7,5 @@ export class File implements FSItem {
 }
 
 export class Directory implements FSItem {
-  constructor(public readonly path: string, public readonly children?: FSItem[]) {}
+  constructor(public readonly path: string, public readonly children: FSItem[] = []) {}
 }

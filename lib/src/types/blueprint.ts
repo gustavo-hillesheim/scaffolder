@@ -3,7 +3,7 @@ export class FileBlueprint {
 }
 
 export class DirectoryBlueprint {
-  constructor(public readonly name: string, public readonly children?: Blueprint[]) {}
+  constructor(public readonly name: string, public readonly children: Blueprint[] = []) {}
 }
 
 export interface ProjectBlueprint {

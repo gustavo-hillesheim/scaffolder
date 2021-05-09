@@ -33,7 +33,6 @@ describe("BlueprintService", () => {
 
     expect(fileReader.readAll).toHaveBeenCalledWith(`${rootDirectoryPath}\\${templateName}`, {
       recursive: true,
-      readContents: true,
     });
     expect(template).toEqual({
       items: [
@@ -48,9 +47,9 @@ describe("BlueprintService", () => {
   it("should list all templates available", async () => {
     (fileReader as jasmine.SpyObj<FileReader>).listAll.and.returnValue(
       Promise.resolve([
-        new Directory("template-one"),
-        new Directory("template-two"),
-        new Directory("template-three"),
+        new Directory("C:\\template-one"),
+        new Directory("C:\\template-two"),
+        new Directory("C:\\template-three"),
       ])
     );
 

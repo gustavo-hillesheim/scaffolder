@@ -21,14 +21,20 @@ export class FileWriter {
 }
 
 function writeFileFn(path: string, content?: string) {
-  return new Promise<void>((resolve) =>
+  return new Promise<void>((resolve, reject) =>
     writeFile(
       path,
       content as string,
       {
         encoding: "utf8",
       },
-      () => resolve()
+      (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      }
     )
   );
 }

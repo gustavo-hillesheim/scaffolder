@@ -1,6 +1,7 @@
 import { Directory, ProjectBlueprint } from "../types";
 import { FileReader } from "../components/file-reader";
 import { createBlueprint } from "../utils";
+import { basename } from "path";
 
 export class BlueprintService {
   constructor(
@@ -13,7 +14,6 @@ export class BlueprintService {
       `${this.blueprintsRootDirectory}\\${blueprintName}`,
       {
         recursive: true,
-        readContents: true,
       }
     );
     return { items: files.map(createBlueprint) };
@@ -24,6 +24,8 @@ export class BlueprintService {
       .listAll(this.blueprintsRootDirectory, {
         recursive: false,
       })
-      .then((files) => files.filter((file) => file instanceof Directory).map((file) => file.path));
+      .then((files) =>
+        files.filter((file) => file instanceof Directory).map((file) => basename(file.path))
+      );
   }
 }
