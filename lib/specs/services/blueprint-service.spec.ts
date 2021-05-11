@@ -1,3 +1,4 @@
+import { join } from "path";
 import {
   BlueprintService,
   Directory,
@@ -5,16 +6,20 @@ import {
   File,
   FileBlueprint,
   FileReader,
+  FileWriter,
+  ProjectBlueprint,
 } from "../../src";
 
 describe("BlueprintService", () => {
   let blueprintService: BlueprintService;
   let fileReader: FileReader;
+  let fileWriter: FileWriter;
   const rootDirectoryPath = "c:\\templates_root_directory";
 
   beforeEach(() => {
-    fileReader = jasmine.createSpyObj("FileReader", ["readAll", "listAll"]);
-    blueprintService = new BlueprintService(fileReader, rootDirectoryPath);
+    fileReader = jasmine.createSpyObj<FileReader>("FileReader", ["readAll", "listAll"]);
+    fileWriter = jasmine.createSpyObj<FileWriter>("FileWriter", ["createDirectory", "writeFile"]);
+    blueprintService = new BlueprintService(fileReader, fileWriter, rootDirectoryPath);
   });
 
   it("should load files items definition for given template", async () => {
@@ -59,5 +64,28 @@ describe("BlueprintService", () => {
       recursive: false,
     });
     expect(availableTemplates).toEqual(["template-one", "template-two", "template-three"]);
+  });
+
+  it("should save blueprint", async () => {
+    await blueprintService.saveBlueprint("test-blueprint", {
+      items: [
+        new FileBlueprint("package.json", '{ "name": "test" }'),
+        new DirectoryBlueprint("src", [
+          new FileBlueprint("index.js", 'console.log("Hello World!");'),
+        ]),
+      ],
+    } as ProjectBlueprint);
+
+    expect(fileWriter.createDirectory).toHaveBeenCalledWith(
+      new Directory(join(rootDirectoryPath, "test-blueprint"), [
+        new File(join(rootDirectoryPath, "test-blueprint", "package.json"), '{ "name": "test" }'),
+        new Directory(join(rootDirectoryPath, "test-blueprint", "src"), [
+          new File(
+            join(rootDirectoryPath, "test-blueprint", "src", "index.js"),
+            'console.log("Hello World!");'
+          ),
+        ]),
+      ])
+    );
   });
 });

@@ -1,13 +1,25 @@
-import { Directory, ProjectBlueprint } from "../types";
-import { FileReader } from "../components/file-reader";
-import { createBlueprint } from "../utils";
 import { basename } from "path";
+
+import { Directory, DirectoryBlueprint, ProjectBlueprint } from "../types";
+import { createBlueprint, createFsItem } from "../utils";
+import { FileWriter, FileReader } from "../components";
 
 export class BlueprintService {
   constructor(
     private readonly fileReader: FileReader,
+    private readonly fileWriter: FileWriter,
     private readonly blueprintsRootDirectory: string
   ) {}
+
+  async saveBlueprint(blueprintName: string, blueprint: ProjectBlueprint): Promise<void> {
+    const directoryBlueprint = createFsItem(
+      new DirectoryBlueprint(blueprintName, blueprint.items),
+      {
+        basePath: this.blueprintsRootDirectory,
+      }
+    );
+    this.fileWriter.createDirectory(directoryBlueprint);
+  }
 
   async loadBlueprint(blueprintName: string): Promise<ProjectBlueprint> {
     const files = await this.fileReader.readAll(

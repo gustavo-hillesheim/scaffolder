@@ -1,5 +1,7 @@
 import {
+  Blueprint,
   createBlueprint,
+  createFsItem,
   Directory,
   DirectoryBlueprint,
   File,
@@ -54,6 +56,57 @@ describe("utils", () => {
   });
 
   it("should throw error when trying to create blueprint of unknown file type", () => {
-    expect(() => createBlueprint({} as FSItem)).toThrow(new Error(`Unknown file type ${{}}`));
+    expect(() => createBlueprint({} as FSItem)).toThrow(new Error(`Unknown file type: Object`));
+  });
+
+  it("should create Directory from DirectoryBlueprint", () => {
+    const directory = createFsItem(new DirectoryBlueprint("project"), {
+      basePath: "C:\\root",
+    });
+    expect(directory).toEqual(new Directory("C:\\root\\project"));
+  });
+
+  it("should create Directory from DirectoryBlueprint with children", () => {
+    const directory = createFsItem(
+      new DirectoryBlueprint("sample_project", [
+        new FileBlueprint(
+          "index.js",
+          "const { message } = require('./src/utils.js');\nconsole.log(message);"
+        ),
+        new DirectoryBlueprint("src", [
+          new FileBlueprint("utils.js", "export const message = 'Hello';"),
+        ]),
+        new DirectoryBlueprint("specs"),
+      ]),
+      {
+        basePath: "D:\\users\\",
+      }
+    );
+
+    expect(directory).toEqual(
+      new Directory("D:\\users\\sample_project", [
+        new File(
+          "D:\\users\\sample_project\\index.js",
+          "const { message } = require('./src/utils.js');\nconsole.log(message);"
+        ),
+        new Directory("D:\\users\\sample_project\\src", [
+          new File("D:\\users\\sample_project\\src\\utils.js", "export const message = 'Hello';"),
+        ]),
+        new Directory("D:\\users\\sample_project\\specs"),
+      ])
+    );
+  });
+
+  it("should create File from FileBlueprint", () => {
+    const file = createFsItem(new FileBlueprint("test.txt", "content"), {
+      basePath: "C:\\base",
+    });
+    expect(file).toEqual(new File("C:\\base\\test.txt", "content"));
+  });
+
+  it("should throw Error on unknown blueprint type", () => {
+    expect(() => createFsItem({} as Blueprint, { basePath: "" })).toThrow(
+      new Error(`Unknown blueprint type: Object`)
+    );
   });
 });
