@@ -18,7 +18,7 @@ export class BlueprintService {
         basePath: this.blueprintsRootDirectory,
       }
     );
-    this.fileWriter.createDirectory(directoryBlueprint);
+    await this.fileWriter.createDirectory(directoryBlueprint);
   }
 
   async loadBlueprint(blueprintName: string): Promise<ProjectBlueprint> {

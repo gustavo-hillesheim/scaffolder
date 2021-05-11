@@ -7,7 +7,7 @@ import {
   File,
   FileBlueprint,
   FSItem,
-} from "../src";
+} from "../../src";
 
 describe("utils", () => {
   it("should create blueprint of a file with content", () => {

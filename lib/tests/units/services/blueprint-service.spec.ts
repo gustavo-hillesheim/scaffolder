@@ -8,7 +8,7 @@ import {
   FileReader,
   FileWriter,
   ProjectBlueprint,
-} from "../../src";
+} from "../../../src";
 
 describe("BlueprintService", () => {
   let blueprintService: BlueprintService;

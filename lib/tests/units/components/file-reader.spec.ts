@@ -1,5 +1,5 @@
 import { sep } from "path";
-import { Directory, File, FileReader } from "../../src";
+import { Directory, File, FileReader } from "../../../src";
 import { RESOURCES_FOLDER } from "../constants";
 
 describe("FileReader", () => {

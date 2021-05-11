@@ -7,7 +7,7 @@ import {
   createFileWriter,
   FileWriter,
   FileReader,
-} from "../src";
+} from "../../src";
 
 describe("index", () => {
   it("should create a ScaffoldingService instance", () => {

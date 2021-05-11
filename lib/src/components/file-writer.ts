@@ -24,8 +24,8 @@ export class FileWriter {
       if (file instanceof File) {
         await this.writeFile(file);
       } else {
-        const directory = file as Directory;
-        await this.createDirectory(directory);
+        const childDirectory = file as Directory;
+        await this.createDirectory(childDirectory);
       }
     }
   }

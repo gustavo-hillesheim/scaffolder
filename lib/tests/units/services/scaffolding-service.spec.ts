@@ -6,7 +6,7 @@ import {
   Directory,
   DirectoryBlueprint,
   Blueprint,
-} from "../../src";
+} from "../../../src";
 
 describe("ScaffoldingService", () => {
   let scaffolderService: ScaffoldingService;
