@@ -1,4 +1,4 @@
-import { readdir, readFile } from "fs";
+import { promises } from "fs";
 import { normalize, sep } from "path";
 import { Directory, File, FSItem } from "../types";
 
@@ -39,35 +39,23 @@ export class FileReader {
     return output;
   }
 
-  private readFile(filePath: string): Promise<string | undefined> {
-    return new Promise((resolve, reject) =>
-      readFile(filePath, { encoding: "utf8" }, (err, data) => {
-        if (err) {
-          reject(err);
-        }
-        resolve(data.toString() || undefined);
+  async readFile(filePath: string): Promise<string | undefined> {
+    return promises
+      .readFile(filePath, {
+        encoding: "utf8",
       })
-    );
+      .then((result) => result || undefined);
   }
 
-  private listDirectoryFiles(directoryPath: string): Promise<FSItem[]> {
-    return new Promise((resolve, reject) =>
-      readdir(directoryPath, { encoding: "utf8", withFileTypes: true }, (err, files) => {
-        if (err) {
-          reject(err);
-        }
-        if (!files || files.length === 0) {
-          resolve([]);
-        } else {
-          resolve(
-            files.map((file) => {
-              return file.isFile()
-                ? new File(`${directoryPath}${sep}${file.name}`)
-                : new Directory(`${directoryPath}${sep}${file.name}`);
-            })
-          );
-        }
-      })
+  private async listDirectoryFiles(directoryPath: string): Promise<FSItem[]> {
+    const files = await promises.readdir(directoryPath, {
+      encoding: "utf8",
+      withFileTypes: true,
+    });
+    return files.map((file) =>
+      file.isFile()
+        ? new File(`${directoryPath}${sep}${file.name}`)
+        : new Directory(`${directoryPath}${sep}${file.name}`)
     );
   }
 }

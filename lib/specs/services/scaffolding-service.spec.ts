@@ -13,7 +13,7 @@ describe("ScaffoldingService", () => {
   let fileWriter: FileWriter;
 
   beforeEach(() => {
-    fileWriter = jasmine.createSpyObj("FileWriter", ["createFile", "createDirectory"]);
+    fileWriter = jasmine.createSpyObj("FileWriter", ["writeFile", "createDirectory"]);
     scaffolderService = new ScaffoldingService(fileWriter);
   });
 
@@ -24,7 +24,7 @@ describe("ScaffoldingService", () => {
       },
     });
 
-    expect(fileWriter.createFile).toHaveBeenCalledWith(
+    expect(fileWriter.writeFile).toHaveBeenCalledWith(
       new File(`${process.cwd()}\\test.js`, 'console.log("Hello World!");')
     );
   });
@@ -37,7 +37,7 @@ describe("ScaffoldingService", () => {
       baseDirectory: "c:\\output\\",
     });
 
-    expect(fileWriter.createFile).toHaveBeenCalledWith(
+    expect(fileWriter.writeFile).toHaveBeenCalledWith(
       new File("c:\\output\\test.cmd", 'echo "Hello World"')
     );
   });
@@ -86,10 +86,10 @@ describe("ScaffoldingService", () => {
     expect(fileWriter.createDirectory).toHaveBeenCalledWith(
       new Directory(`${process.cwd()}\\scaffolderService\\src`)
     );
-    expect(fileWriter.createFile).toHaveBeenCalledWith(
+    expect(fileWriter.writeFile).toHaveBeenCalledWith(
       new File(`${process.cwd()}\\scaffolderService\\src\\index.js`, 'console.log("Hello World!");')
     );
-    expect(fileWriter.createFile).toHaveBeenCalledWith(
+    expect(fileWriter.writeFile).toHaveBeenCalledWith(
       new File(
         `${process.cwd()}\\scaffolderService\\package.json`,
         '{ "name": "scaffolderService", "version": "0.0.1", "main": "src/index.js" }'

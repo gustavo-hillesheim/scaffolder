@@ -27,7 +27,7 @@ export class ScaffoldingService {
 
   private async buildFile(file: FileBlueprint, baseDirectory: string): Promise<void> {
     const finalFilePath = `${baseDirectory}${file.name}`;
-    await this.fileWriter.createFile(new File(finalFilePath, file.content));
+    await this.fileWriter.writeFile(new File(finalFilePath, file.content));
   }
 
   private async buildDirectory(
@@ -36,14 +36,12 @@ export class ScaffoldingService {
   ): Promise<void> {
     const finalDirectoryPath = `${baseDirectory}${directory.name}`;
     await this.fileWriter.createDirectory(new Directory(finalDirectoryPath));
-    if (directory.children) {
-      this.build({
-        projectBlueprint: {
-          items: directory.children,
-        },
-        baseDirectory: finalDirectoryPath,
-      });
-    }
+    this.build({
+      projectBlueprint: {
+        items: directory.children,
+      },
+      baseDirectory: finalDirectoryPath,
+    });
   }
 }
 
