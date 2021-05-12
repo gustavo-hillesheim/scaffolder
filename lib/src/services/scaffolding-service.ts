@@ -7,20 +7,21 @@ export class ScaffoldingService {
 
   async build(buildDefinition: BuildDefinition): Promise<void> {
     const baseDirectory = this.getBaseDirectory(buildDefinition);
-    for (const item of buildDefinition.projectBlueprint.items) {
+
+    for (const item of buildDefinition.blueprint.items) {
       if (item instanceof FileBlueprint) {
         await this.buildFile(item, baseDirectory);
       } else if (item instanceof DirectoryBlueprint) {
         await this.buildDirectory(item, baseDirectory);
       } else {
-        throw new Error("Unknown file type");
+        throw new Error(`Unknown blueprint type: ${(item as any).constructor.name}`);
       }
     }
   }
 
   private getBaseDirectory(buildDefinition: BuildDefinition): string {
-    if (buildDefinition.baseDirectory) {
-      return normalize(buildDefinition.baseDirectory + sep);
+    if (buildDefinition.outputDirectory) {
+      return normalize(buildDefinition.outputDirectory + sep);
     }
     return normalize(process.cwd() + sep);
   }
@@ -36,16 +37,16 @@ export class ScaffoldingService {
   ): Promise<void> {
     const finalDirectoryPath = `${baseDirectory}${directory.name}`;
     await this.fileWriter.createDirectory(new Directory(finalDirectoryPath));
-    this.build({
-      projectBlueprint: {
+    await this.build({
+      blueprint: {
         items: directory.children,
       },
-      baseDirectory: finalDirectoryPath,
+      outputDirectory: finalDirectoryPath,
     });
   }
 }
 
 export interface BuildDefinition {
-  projectBlueprint: ProjectBlueprint;
-  baseDirectory?: string;
+  blueprint: ProjectBlueprint;
+  outputDirectory?: string;
 }

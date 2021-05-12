@@ -17,7 +17,7 @@ describe("Save Blueprint", () => {
   });
 
   afterEach(() => {
-    clearResourcesDir();
+    clearBlueprintsDir();
   });
 
   it("should save the given blueprint inside the output folder", async () => {
@@ -32,24 +32,24 @@ describe("Save Blueprint", () => {
       ],
     });
 
-    expectDirAt(pathToResource("test-blueprint"));
-    expectDirAt(pathToResource("test-blueprint", "project"));
-    expectDirAt(pathToResource("test-blueprint", "project", "src"));
+    expectDirAt(pathToOutput("test-blueprint"));
+    expectDirAt(pathToOutput("test-blueprint", "project"));
+    expectDirAt(pathToOutput("test-blueprint", "project", "src"));
     expectFileAt(
-      pathToResource("test-blueprint", "project", "package.json"),
+      pathToOutput("test-blueprint", "project", "package.json"),
       '{ "name": "scaffolding" }'
     );
     expectFileAt(
-      pathToResource("test-blueprint", "project", "src", "index.js"),
+      pathToOutput("test-blueprint", "project", "src", "index.js"),
       'console.log("Scaffolding Works!");'
     );
   });
 
-  function pathToResource(...pathSegments: string[]): string {
+  function pathToOutput(...pathSegments: string[]): string {
     return join(BLUEPRINTS_DIRECTORY_PATH, ...pathSegments);
   }
 
-  function clearResourcesDir(): void {
+  function clearBlueprintsDir(): void {
     clearDir(BLUEPRINTS_DIRECTORY_PATH);
   }
 });

@@ -16,9 +16,7 @@
     "generate",
     "templates",
     "template",
-    "project setup",
-    "ng generate",
-    "dart create"
+    "project setup"
   ],
   "scripts": {
     "build": "tsc",

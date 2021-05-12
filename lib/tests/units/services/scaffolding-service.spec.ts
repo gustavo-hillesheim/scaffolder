@@ -19,7 +19,7 @@ describe("ScaffoldingService", () => {
 
   it("should create simple file", async () => {
     await scaffolderService.build({
-      projectBlueprint: {
+      blueprint: {
         items: [new FileBlueprint("test.js", 'console.log("Hello World!");')],
       },
     });
@@ -31,10 +31,10 @@ describe("ScaffoldingService", () => {
 
   it("should create file in specified directory", async () => {
     await scaffolderService.build({
-      projectBlueprint: {
+      blueprint: {
         items: [new FileBlueprint("test.cmd", 'echo "Hello World"')],
       },
-      baseDirectory: "c:\\output\\",
+      outputDirectory: "c:\\output\\",
     });
 
     expect(fileWriter.writeFile).toHaveBeenCalledWith(
@@ -44,10 +44,10 @@ describe("ScaffoldingService", () => {
 
   it("should create folder in specified directory", async () => {
     await scaffolderService.build({
-      projectBlueprint: {
+      blueprint: {
         items: [new DirectoryBlueprint("src")],
       },
-      baseDirectory: "C:\\base_dir",
+      outputDirectory: "C:\\base_dir",
     });
 
     expect(fileWriter.createDirectory).toHaveBeenCalledWith(new Directory(`C:\\base_dir\\src`));
@@ -55,7 +55,7 @@ describe("ScaffoldingService", () => {
 
   it("should create folder", async () => {
     await scaffolderService.build({
-      projectBlueprint: {
+      blueprint: {
         items: [new DirectoryBlueprint("src")],
       },
     });
@@ -65,7 +65,7 @@ describe("ScaffoldingService", () => {
 
   it("should create folder with nested folders/files", async () => {
     await scaffolderService.build({
-      projectBlueprint: {
+      blueprint: {
         items: [
           new DirectoryBlueprint("scaffolderService", [
             new DirectoryBlueprint("src", [
@@ -100,11 +100,11 @@ describe("ScaffoldingService", () => {
   it("should throw error on unknown file type", async () => {
     const runScaffold = () =>
       scaffolderService.build({
-        projectBlueprint: {
+        blueprint: {
           items: [{} as Blueprint],
         },
       });
 
-    await expectAsync(runScaffold()).toBeRejectedWith(new Error("Unknown file type"));
+    await expectAsync(runScaffold()).toBeRejectedWith(new Error("Unknown blueprint type: Object"));
   });
 });
