@@ -1,6 +1,6 @@
 {
   "name": "@gus_hill/scaffolding",
-  "version": "0.0.1-SNAPSHOT-1",
+  "version": "0.0.2-SNAPSHOT.1",
   "description": "A package that helps creating directories and files out of templates. Useful for creating a initial project setup, or complex components in big projects.",
   "author": "Gustavo.Hillesheim",
   "repository": "https://github.com/gustavo-hillesheim/scaffolding",
@@ -29,7 +29,7 @@
     "coverage": "nyc -r text -e .ts --include src -x \"tests/**/*.spec.ts\" -x \"src/di.ts\" npm run test",
     "coverage:html": "nyc -r html -e .ts --include src -x \"tests/**/*.spec.ts\" -x \"src/di.ts\" npm run test",
     "publish:local": "npm link",
-    "publish": "npm run build && npm publish --access public"
+    "publish:npm": "npm run build && npm publish --access public"
   },
   "devDependencies": {
     "@types/jasmine": "^3.6.11",

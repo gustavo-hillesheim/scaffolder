@@ -1,8 +1,7 @@
 .gitignore
-jasmine.json
 package-lock.json
 tsconfig.json
-specs
+tests
 coverage
 src
 .github
