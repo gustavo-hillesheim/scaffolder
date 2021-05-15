@@ -1,11 +1,32 @@
-import { existsSync, lstatSync, readdirSync, readFileSync, rmdirSync, unlinkSync } from "fs";
+import {
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmdirSync,
+  unlinkSync,
+  writeFileSync,
+} from "fs";
 import { normalize, sep } from "path";
+
+export function createDirAt(dirPath: string): void {
+  mkdirSync(dirPath);
+}
+
+export function createFileAt(filePath: string, content: string): void {
+  writeFileSync(filePath, content, { encoding: "utf8" });
+}
 
 export function expectFileAt(filePath: string, content: string): void {
   expect(existsSync(filePath)).toBeTruthy(`Item existing at ${filePath}`);
   expect(lstatSync(filePath).isFile()).toBeTruthy(`Item at ${filePath} is file`);
   const fileContent = readFileSync(normalize(filePath));
   expect(fileContent.toString()).toEqual(content);
+}
+
+export function expectNothingAt(filePath: string): void {
+  expect(existsSync(filePath)).toBeFalsy(`Item not existing at ${filePath}`);
 }
 
 export function expectDirAt(dirPath: string): void {

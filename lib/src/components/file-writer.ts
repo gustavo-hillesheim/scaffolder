@@ -29,4 +29,17 @@ export class FileWriter {
       }
     }
   }
+
+  async delete(path: string): Promise<void> {
+    return promises
+      .lstat(path)
+      .then((item) => {
+        if (item.isDirectory()) {
+          return promises.rmdir(path);
+        } else {
+          return promises.unlink(path);
+        }
+      })
+      .catch(console.error);
+  }
 }

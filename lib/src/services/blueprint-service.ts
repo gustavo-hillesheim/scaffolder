@@ -1,4 +1,4 @@
-import { basename } from "path";
+import { basename, join } from "path";
 
 import { Directory, DirectoryBlueprint, ProjectBlueprint } from "../types";
 import { createBlueprint, createFsItem } from "../utils";
@@ -22,12 +22,9 @@ export class BlueprintService {
   }
 
   async loadBlueprint(blueprintName: string): Promise<ProjectBlueprint> {
-    const files = await this.fileReader.readAll(
-      `${this.blueprintsRootDirectory}\\${blueprintName}`,
-      {
-        recursive: true,
-      }
-    );
+    const files = await this.fileReader.readAll(join(this.blueprintsRootDirectory, blueprintName), {
+      recursive: true,
+    });
     return { items: files.map(createBlueprint) };
   }
 
@@ -39,5 +36,18 @@ export class BlueprintService {
       .then((files) =>
         files.filter((file) => file instanceof Directory).map((file) => basename(file.path))
       );
+  }
+
+  async blueprintExists(blueprintName: string): Promise<boolean> {
+    return this.fileReader.exists(join(this.blueprintsRootDirectory, blueprintName));
+  }
+
+  async deleteBlueprint(blueprintName: string): Promise<void> {
+    const blueprintExists = await this.blueprintExists(blueprintName);
+    if (blueprintExists) {
+      return this.fileWriter.delete(join(this.blueprintsRootDirectory, blueprintName));
+    } else {
+      return Promise.reject(new Error(`The blueprint '${blueprintName}' does not exist`));
+    }
   }
 }

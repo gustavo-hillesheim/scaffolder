@@ -10,21 +10,6 @@ export class FileReader {
     return this.readFilesContents(files);
   }
 
-  private async readFilesContents(files: FSItem[]): Promise<FSItem[]> {
-    const filesWithContent = [];
-    for (const file of files) {
-      if (file instanceof File) {
-        const fileContent = await this.readFile(file.path);
-        filesWithContent.push(new File(file.path, fileContent));
-      } else {
-        const directory = file as Directory;
-        const childrenWithContent = await this.readFilesContents(directory.children);
-        filesWithContent.push(new Directory(directory.path, childrenWithContent));
-      }
-    }
-    return filesWithContent;
-  }
-
   async listAll(directoryPath: string, options: ListOptions = {}): Promise<FSItem[]> {
     const files = await this.listDirectoryFiles(normalize(directoryPath));
     const output = [];
@@ -45,6 +30,28 @@ export class FileReader {
         encoding: "utf8",
       })
       .then((result) => result || undefined);
+  }
+
+  async exists(filePath: string): Promise<boolean> {
+    return promises
+      .stat(filePath)
+      .then((data) => !!data)
+      .catch(() => false);
+  }
+
+  private async readFilesContents(files: FSItem[]): Promise<FSItem[]> {
+    const filesWithContent = [];
+    for (const file of files) {
+      if (file instanceof File) {
+        const fileContent = await this.readFile(file.path);
+        filesWithContent.push(new File(file.path, fileContent));
+      } else {
+        const directory = file as Directory;
+        const childrenWithContent = await this.readFilesContents(directory.children);
+        filesWithContent.push(new Directory(directory.path, childrenWithContent));
+      }
+    }
+    return filesWithContent;
   }
 
   private async listDirectoryFiles(directoryPath: string): Promise<FSItem[]> {
