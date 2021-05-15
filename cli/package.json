@@ -13,7 +13,7 @@
     "typescript": "^4.2.4"
   },
   "dependencies": {
-    "@gus_hill/scaffolding": "^0.0.2-SNAPSHOT.1",
+    "@gus_hill/scaffolding": "file:../lib/build",
     "commander": "^7.2.0",
     "minimal-di": "^1.0.1"
   }

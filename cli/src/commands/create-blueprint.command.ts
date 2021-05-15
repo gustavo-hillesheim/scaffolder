@@ -1,21 +1,28 @@
-import { Directory, File, FileReader, FileWriter, FSItem } from "@gus_hill/scaffolding";
-import { sep } from "path";
+import {
+  BlueprintService,
+  createBlueprint,
+  Directory,
+  DirectoryBlueprint,
+  FileReader,
+  FSItem,
+  ProjectBlueprint,
+} from "@gus_hill/scaffolding";
+import { basename } from "path";
 
 export class CreateBlueprintCommand {
-  constructor(
-    private fileReader: FileReader,
-    private fileWriter: FileWriter,
-    private blueprintsRootFolder: string
-  ) {}
+  constructor(private fileReader: FileReader, private blueprintService: BlueprintService) {}
 
   execute = async (blueprintName: string, { targetDirectory }: CreateBlueprintOptions) => {
-    const directoryBlueprint = await this.readDirectoryBlueprint(targetDirectory);
-    console.log(JSON.stringify(directoryBlueprint));
-    await this.saveBlueprint(directoryBlueprint, blueprintName);
+    targetDirectory = targetDirectory || process.cwd();
+    const directoryItems = await this.readDirectoryBlueprint(targetDirectory);
+    await this.saveBlueprint(blueprintName, {
+      items: [
+        new DirectoryBlueprint(basename(targetDirectory), directoryItems.map(createBlueprint)),
+      ],
+    });
   };
 
-  private async readDirectoryBlueprint(targetDirectory?: string): Promise<FSItem[]> {
-    targetDirectory = targetDirectory || process.cwd();
+  private async readDirectoryBlueprint(targetDirectory: string): Promise<FSItem[]> {
     console.log(`Reading files of directory ${targetDirectory}...`);
     const directoryBlueprint = await this.fileReader.readAll(targetDirectory, {
       recursive: true,
@@ -37,29 +44,10 @@ export class CreateBlueprintCommand {
     return total;
   }
 
-  private async saveBlueprint(blueprint: FSItem[], blueprintName: string): Promise<void> {
-    const blueprintDirectoryPath = this.blueprintsRootFolder + sep + blueprintName;
+  private async saveBlueprint(blueprintName: string, blueprint: ProjectBlueprint): Promise<void> {
     console.log(`Saving blueprint ${blueprintName}...`);
-    await this.fileWriter.createDirectory(new Directory(blueprintDirectoryPath));
-    await this.saveFilesRecursively(blueprint, blueprintDirectoryPath);
+    await this.blueprintService.saveBlueprint(blueprintName, blueprint);
     console.log("Blueprint saved!");
-  }
-
-  private async saveFilesRecursively(
-    blueprint: FSItem[],
-    blueprintDirectoryPath: string
-  ): Promise<void> {
-    for (const file of blueprint) {
-      if (file instanceof File) {
-        console.log(`Writing ${file.path} with content ${file.content}`);
-        this.fileWriter.writeFile(new File(blueprintDirectoryPath + sep + file.path));
-      } else if (file instanceof Directory) {
-        this.fileWriter.createDirectory(new Directory(blueprintDirectoryPath + sep + file.path));
-        if (file.children) {
-          this.saveFilesRecursively(file.children, blueprintDirectoryPath);
-        }
-      }
-    }
   }
 }
 

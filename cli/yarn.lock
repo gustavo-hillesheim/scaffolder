@@ -2,12 +2,8 @@
 # yarn lockfile v1
 
 
-"@gus_hill/scaffolding@^0.0.2-SNAPSHOT.1":
-  "integrity" "sha512-09o+YNI9s6ejBQP8SptvcW6UaDCnhTB5z0weMrvnJFtF4swIJXmbGLsx2x8NPJg+edNzJxdTInnhqsRg+DobuA=="
-  "resolved" "https://registry.npmjs.org/@gus_hill/scaffolding/-/scaffolding-0.0.2-SNAPSHOT.1.tgz"
-  "version" "0.0.2-SNAPSHOT.1"
-  dependencies:
-    "minimal-di" "^1.0.1"
+"@gus_hill/scaffolding@file:../lib/build":
+  "resolved" "file:../lib/build"
 
 "@types/node@^15.0.2":
   "integrity" "sha512-8/bnjSZD86ZfpBsDlCIkNXIvm+h6wi9g7IqL+kmFkQ+Wvu3JrasgLElfiPgoo8V8vVfnEi0QVS12gbl94h9YsQ=="

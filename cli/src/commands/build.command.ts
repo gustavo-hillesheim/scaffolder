@@ -1,6 +1,6 @@
 import { BlueprintService, ScaffoldingService } from "@gus_hill/scaffolding";
 
-export class ScaffoldCommand {
+export class BuildCommand {
   constructor(
     private blueprintService: BlueprintService,
     private scaffoldingService: ScaffoldingService
@@ -10,7 +10,12 @@ export class ScaffoldCommand {
     if (!blueprintName) {
       await this.listAvailableBlueprints();
     } else {
-      await this.buildBlueprint(blueprintName);
+      const blueprintExists = this.blueprintService.blueprintExists(blueprintName);
+      if (!blueprintExists) {
+        console.log(`The blueprint '${blueprintName}' does not exist.`);
+      } else {
+        await this.buildBlueprint(blueprintName);
+      }
     }
   };
 
@@ -19,7 +24,7 @@ export class ScaffoldCommand {
     console.log("No blueprint was informed.");
     if (blueprints.length === 0) {
       console.log(
-        "There is no blueprint available. Use 'blueprint create' in a directory to create a blueprint of it."
+        "There is no blueprint available. Use the command 'create blueprint' in a directory to create a blueprint of it."
       );
     } else {
       console.log("Available blueprints:");

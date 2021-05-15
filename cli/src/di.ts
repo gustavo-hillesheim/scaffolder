@@ -10,8 +10,10 @@ import {
 } from "@gus_hill/scaffolding";
 import { MinimalDIContainer } from "minimal-di";
 import { normalize } from "path";
-import { ScaffoldCommand } from "./commands/scaffold.command";
+import { BuildCommand } from "./commands/build.command";
 import { CreateBlueprintCommand } from "./commands/create-blueprint.command";
+import { DeleteBlueprintCommand } from "./commands/delete-blueprint.command";
+import { ListBlueprintsCommand } from "./commands/list-blueprints.command";
 
 const BLUEPRINTS_ROOT_DIR = normalize(__dirname + "\\..\\blueprints");
 
@@ -23,15 +25,18 @@ diContainer.register(FileReader, () => createFileReader());
 diContainer.register(FileWriter, () => createFileWriter());
 
 diContainer.register(
-  ScaffoldCommand,
-  () => new ScaffoldCommand(diContainer.get(BlueprintService), diContainer.get(ScaffoldingService))
+  BuildCommand,
+  () => new BuildCommand(diContainer.get(BlueprintService), diContainer.get(ScaffoldingService))
+);
+diContainer.register(
+  ListBlueprintsCommand,
+  () => new ListBlueprintsCommand(diContainer.get(BlueprintService))
 );
 diContainer.register(
   CreateBlueprintCommand,
-  () =>
-    new CreateBlueprintCommand(
-      diContainer.get(FileReader),
-      diContainer.get(FileWriter),
-      BLUEPRINTS_ROOT_DIR
-    )
+  () => new CreateBlueprintCommand(diContainer.get(FileReader), diContainer.get(BlueprintService))
+);
+diContainer.register(
+  DeleteBlueprintCommand,
+  () => new DeleteBlueprintCommand(diContainer.get(BlueprintService))
 );

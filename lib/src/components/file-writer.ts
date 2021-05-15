@@ -4,8 +4,6 @@ import { dirname, normalize } from "path";
 import { Directory, File } from "../types";
 
 export class FileWriter {
-  constructor() {}
-
   async writeFile(file: File): Promise<void> {
     const directoryPath = dirname(file.path);
     if (!existsSync(directoryPath)) {
@@ -33,13 +31,16 @@ export class FileWriter {
   async delete(path: string): Promise<void> {
     return promises
       .lstat(path)
-      .then((item) => {
-        if (item.isDirectory()) {
-          return promises.rmdir(path);
-        } else {
-          return promises.unlink(path);
+      .catch(() => null)
+      .then(async (item) => {
+        if (!item) {
+          return;
         }
-      })
-      .catch(console.error);
+        if (item.isDirectory()) {
+          await promises.rmdir(path, { recursive: true });
+        } else {
+          await promises.unlink(path);
+        }
+      });
   }
 }
