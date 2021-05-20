@@ -20,9 +20,5 @@ export function createFileWriter(): FileWriter {
 }
 
 export function createBlueprintService(blueprintsDirectory: string): BlueprintService {
-  return new BlueprintService(
-    diContainer.get(FileReader),
-    diContainer.get(FileWriter),
-    blueprintsDirectory
-  );
+  return new BlueprintService(createFileReader(), createFileWriter(), blueprintsDirectory);
 }

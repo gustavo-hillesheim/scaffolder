@@ -27,6 +27,8 @@
     "test:watch": "nodemon --watch src --watch tests/specs --exec \"npm run test\" -e ts",
     "coverage": "nyc -r text -e .ts --include src -x \"tests/**/*.spec.ts\" -x \"src/di.ts\" npm run test",
     "coverage:html": "nyc -r html -e .ts --include src -x \"tests/**/*.spec.ts\" -x \"src/di.ts\" npm run test",
+    "coverage:e2e": "nyc -r text -e .ts --include src -x \"tests/**/*.spec.ts\" npm run e2e",
+    "coverage:e2e:html": "nyc -r html -e .ts --include src -x \"tests/**/*.spec.ts\" npm run e2e",
     "publish:local": "npm link",
     "publish:npm": "npm run build && npm publish --access public"
   },

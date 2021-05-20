@@ -22,6 +22,7 @@ export class BlueprintService {
   }
 
   async loadBlueprint(blueprintName: string): Promise<ProjectBlueprint> {
+    await this.ensureBlueprintExists(blueprintName);
     const files = await this.fileReader.readAll(join(this.blueprintsRootDirectory, blueprintName), {
       recursive: true,
     });
@@ -38,16 +39,19 @@ export class BlueprintService {
       );
   }
 
+  async deleteBlueprint(blueprintName: string): Promise<void> {
+    await this.ensureBlueprintExists(blueprintName);
+    return this.fileWriter.delete(join(this.blueprintsRootDirectory, blueprintName));
+  }
+
   async blueprintExists(blueprintName: string): Promise<boolean> {
     return this.fileReader.exists(join(this.blueprintsRootDirectory, blueprintName));
   }
 
-  async deleteBlueprint(blueprintName: string): Promise<void> {
+  private async ensureBlueprintExists(blueprintName: string): Promise<void> {
     const blueprintExists = await this.blueprintExists(blueprintName);
-    if (blueprintExists) {
-      return this.fileWriter.delete(join(this.blueprintsRootDirectory, blueprintName));
-    } else {
-      return Promise.reject(new Error(`The blueprint '${blueprintName}' does not exist`));
+    if (!blueprintExists) {
+      throw new Error(`The blueprint '${blueprintName}' does not exist`);
     }
   }
 }

@@ -8,7 +8,8 @@ import {
 import { clearDir, expectDirAt, expectFileAt } from "../utils";
 
 describe("Build Blueprint", () => {
-  const BLUEPRINTS_DIRECTORY_PATH = __dirname + sep + "input" + sep + "blueprints";
+  const BLUEPRINTS_DIRECTORY_PATH =
+    __dirname + sep + "input" + sep + "build-blueprint" + sep + "blueprints";
   const OUTPUT_DIRECTORY_PATH = __dirname + sep + "output";
 
   let blueprintService: BlueprintService;
@@ -37,6 +38,10 @@ describe("Build Blueprint", () => {
       pathToOutput("sample_project", "lib", "main.dart"),
       "void main(List<String> args) {\r\n  print('Hello Dart!');\r\n}\r\n"
     );
+  });
+
+  it("should throw error when loading a blueprint that does not exist", async () => {
+    await expectAsync(blueprintService.loadBlueprint("non_existing_project")).toBeRejected();
   });
 
   function pathToOutput(...pathSegments: string[]): string {

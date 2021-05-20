@@ -34,6 +34,7 @@ describe("BlueprintService", () => {
         ]),
       ];
       fileReader.readAll.and.returnValue(Promise.resolve(templateFiles));
+      fileReader.exists.and.returnValue(Promise.resolve(true));
 
       const templateName = "test-template";
       const template = await blueprintService.loadBlueprint(templateName);

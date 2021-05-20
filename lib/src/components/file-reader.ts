@@ -3,8 +3,6 @@ import { normalize, sep } from "path";
 import { Directory, File, FSItem } from "../types";
 
 export class FileReader {
-  constructor() {}
-
   async readAll(directoryPath: string, options: ReadOptions = {}): Promise<FSItem[]> {
     const files = await this.listAll(directoryPath, options);
     return this.readFilesContents(files);
