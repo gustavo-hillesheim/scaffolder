@@ -11,7 +11,7 @@ import {
 import { MinimalDIContainer } from "minimal-di";
 import { normalize } from "path";
 import { BuildCommand } from "./commands/build.command";
-import { CreateBlueprintCommand } from "./commands/create-blueprint.command";
+import { SaveBlueprintCommand } from "./commands/save-blueprint.command";
 import { DeleteBlueprintCommand } from "./commands/delete-blueprint.command";
 import { ListBlueprintsCommand } from "./commands/list-blueprints.command";
 
@@ -33,8 +33,8 @@ diContainer.register(
   () => new ListBlueprintsCommand(diContainer.get(BlueprintService))
 );
 diContainer.register(
-  CreateBlueprintCommand,
-  () => new CreateBlueprintCommand(diContainer.get(FileReader), diContainer.get(BlueprintService))
+  SaveBlueprintCommand,
+  () => new SaveBlueprintCommand(diContainer.get(FileReader), diContainer.get(BlueprintService))
 );
 diContainer.register(
   DeleteBlueprintCommand,

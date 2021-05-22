@@ -1,5 +1,7 @@
 node_modules
 yarn-error.log
 blueprints/
-sample_project
+sample_project_js
+sample_project_dart
 build
+.vscode

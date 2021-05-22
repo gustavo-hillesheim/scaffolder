@@ -1,6 +1,7 @@
 import { basename, join } from "path";
 
 import {
+  BlueprintAlreadyExistsError,
   Directory,
   DirectoryBlueprint,
   InexistingBlueprintError,
@@ -9,6 +10,10 @@ import {
 import { createBlueprint, createFsItem } from "../utils";
 import { FileWriter, FileReader } from "../components";
 
+type SaveBlueprintOptions = {
+  override?: boolean;
+};
+
 export class BlueprintService {
   constructor(
     private readonly fileReader: FileReader,
@@ -16,7 +21,19 @@ export class BlueprintService {
     private readonly blueprintsRootDirectory: string
   ) {}
 
-  async saveBlueprint(blueprintName: string, blueprint: ProjectBlueprint): Promise<void> {
+  async saveBlueprint(
+    blueprintName: string,
+    blueprint: ProjectBlueprint,
+    options?: SaveBlueprintOptions
+  ): Promise<void> {
+    const blueprintExists = await this.blueprintExists(blueprintName);
+    if (blueprintExists) {
+      if (!options?.override) {
+        throw new BlueprintAlreadyExistsError(blueprintName);
+      } else {
+        await this.deleteBlueprint(blueprintName);
+      }
+    }
     const directoryBlueprint = createFsItem(
       new DirectoryBlueprint(blueprintName, blueprint.items),
       {

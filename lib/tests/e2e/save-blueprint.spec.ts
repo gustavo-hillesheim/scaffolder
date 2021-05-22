@@ -1,5 +1,5 @@
 import { join, sep } from "path";
-import { clearDir, expectDirAt, expectFileAt } from "../utils";
+import { clearDir, expectDirAt, expectFileAt, expectNothingAt } from "../utils";
 import {
   BlueprintService,
   createBlueprintService,
@@ -43,6 +43,43 @@ describe("Save Blueprint", () => {
       pathToOutput("test-blueprint", "project", "src", "index.js"),
       'console.log("Scaffolding Works!");'
     );
+  });
+
+  it("should throw error when trying to save a blueprint that already exists", async () => {
+    await blueprintService.saveBlueprint("already-existing-blueprint", { items: [] });
+    expectDirAt(pathToOutput("already-existing-blueprint"));
+
+    await expectAsync(
+      blueprintService.saveBlueprint("already-existing-blueprint", {
+        items: [],
+      })
+    ).toBeRejected();
+  });
+
+  it("should override an existing blueprint", async () => {
+    await blueprintService.saveBlueprint("already-existing-blueprint", {
+      items: [new FileBlueprint("index.js", "console.log('I will be overwrote');")],
+    });
+    expectDirAt(pathToOutput("already-existing-blueprint"));
+    expectFileAt(
+      pathToOutput("already-existing-blueprint", "index.js"),
+      "console.log('I will be overwrote');"
+    );
+
+    await blueprintService.saveBlueprint(
+      "already-existing-blueprint",
+      {
+        items: [new FileBlueprint("package.json", '{ "name": "scaffolding" }')],
+      },
+      { override: true }
+    );
+
+    expectDirAt(pathToOutput("already-existing-blueprint"));
+    expectFileAt(
+      pathToOutput("already-existing-blueprint", "package.json"),
+      '{ "name": "scaffolding" }'
+    );
+    expectNothingAt(pathToOutput("already-existing-blueprint", "index.js"));
   });
 
   function pathToOutput(...pathSegments: string[]): string {
