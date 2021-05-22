@@ -1,5 +1,5 @@
 export class TemplateProcessor {
-  process(template: string, variables: Record<string, string | number | boolean>): string {
+  process(template: string, variables: TemplateVariables): string {
     return new TemplateProcessorDelegate(template, variables).process();
   }
 }
@@ -8,10 +8,7 @@ class TemplateProcessorDelegate {
   private result = "";
   private lastIndex = 0;
 
-  constructor(
-    private template: string,
-    private variables: Record<string, string | number | boolean>
-  ) {}
+  constructor(private template: string, private variables: TemplateVariables) {}
 
   process(): string {
     for (const variable of this.findVariables()) {
@@ -55,6 +52,8 @@ class TemplateProcessorDelegate {
     this.result += variableValue;
   }
 }
+
+export type TemplateVariables = Record<string, string | number | boolean>;
 
 type VariablePlaceholderInfo = {
   name: string;

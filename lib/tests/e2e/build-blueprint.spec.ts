@@ -29,14 +29,17 @@ describe("Build Blueprint", () => {
     await scaffoldingService.build({
       blueprint,
       outputDirectory: OUTPUT_DIRECTORY_PATH,
+      variables: {
+        projectName: "dart_project",
+      },
     });
 
-    expectDirAt(pathToOutput("sample_project"));
-    expectDirAt(pathToOutput("sample_project", "lib"));
-    expectFileAt(pathToOutput("sample_project", "pubspec.yaml"), "name: sample_project\r\n");
+    expectDirAt(pathToOutput("dart_project"));
+    expectDirAt(pathToOutput("dart_project", "lib"));
+    expectFileAt(pathToOutput("dart_project", "pubspec.yaml"), "name: dart_project\r\n");
     expectFileAt(
-      pathToOutput("sample_project", "lib", "main.dart"),
-      "void main(List<String> args) {\r\n  print('Hello Dart!');\r\n}\r\n"
+      pathToOutput("dart_project", "lib", "main.dart"),
+      "void main(List<String> args) {\r\n  print('Hello dart_project!');\r\n}\r\n"
     );
   });
 

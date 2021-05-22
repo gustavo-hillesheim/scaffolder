@@ -100,6 +100,9 @@ describe("ScaffoldingService", () => {
           ]),
         ],
       },
+      variables: {
+        testVar: "I'm not used",
+      },
     });
 
     expect(fileWriter.createDirectory).toHaveBeenCalledWith(
@@ -117,14 +120,16 @@ describe("ScaffoldingService", () => {
         '{ "name": "scaffolderService", "version": "0.0.1", "main": "src/index.js" }'
       )
     );
-    expect(processSpy).toHaveBeenCalledWith("scaffolderService", {});
-    expect(processSpy).toHaveBeenCalledWith("src", {});
-    expect(processSpy).toHaveBeenCalledWith("index.js", {});
-    expect(processSpy).toHaveBeenCalledWith('console.log("Hello World!");', {});
-    expect(processSpy).toHaveBeenCalledWith("package.json", {});
+    expect(processSpy).toHaveBeenCalledWith("scaffolderService", { testVar: "I'm not used" });
+    expect(processSpy).toHaveBeenCalledWith("src", { testVar: "I'm not used" });
+    expect(processSpy).toHaveBeenCalledWith("index.js", { testVar: "I'm not used" });
+    expect(processSpy).toHaveBeenCalledWith('console.log("Hello World!");', {
+      testVar: "I'm not used",
+    });
+    expect(processSpy).toHaveBeenCalledWith("package.json", { testVar: "I'm not used" });
     expect(processSpy).toHaveBeenCalledWith(
       '{ "name": "scaffolderService", "version": "0.0.1", "main": "src/index.js" }',
-      {}
+      { testVar: "I'm not used" }
     );
   });
 
