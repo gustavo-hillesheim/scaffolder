@@ -121,7 +121,7 @@ describe("BlueprintService", () => {
       );
 
       await expectAsync(savePromise).toBeResolved();
-      expect(fileReader.exists).toHaveBeenCalledOnceWith(join(rootDirectoryPath, "test-blueprint"));
+      expect(fileReader.exists).toHaveBeenCalledWith(join(rootDirectoryPath, "test-blueprint"));
     });
   });
 
