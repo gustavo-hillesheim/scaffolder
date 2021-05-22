@@ -1,4 +1,8 @@
-import { BlueprintService, ScaffoldingService } from "@gus_hill/scaffolding";
+import {
+  BlueprintProcessingError,
+  BlueprintService,
+  ScaffoldingService,
+} from "@gus_hill/scaffolding";
 
 export class BuildCommand {
   constructor(
@@ -41,8 +45,15 @@ export class BuildCommand {
         blueprint,
         variables,
       })
-      .catch((error) =>
-        console.error(`Error while building blueprint '${blueprintName}': ${error.message}`)
-      );
+      .then(() => console.log("Bluprint built successfully!"))
+      .catch((error) => this.handleBuildError(blueprintName, error));
+  }
+
+  private handleBuildError(blueprintName: string, error: Error) {
+    const messagePrefix = `Error while building blueprint '${blueprintName}': `;
+    console.error(
+      messagePrefix +
+        (error instanceof BlueprintProcessingError ? error.shortMessage : error.message)
+    );
   }
 }

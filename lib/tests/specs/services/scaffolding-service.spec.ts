@@ -143,4 +143,26 @@ describe("ScaffoldingService", () => {
 
     await expectAsync(runScaffold()).toBeRejectedWith(new Error("Unknown blueprint type: Object"));
   });
+
+  it("should throw error and not write any file when a variable was not defined", async () => {
+    const buildPromise = scaffolderService.build({
+      blueprint: {
+        items: [
+          new DirectoryBlueprint("src", [
+            new FileBlueprint("index.js", "console.log('Hello $person');"),
+          ]),
+        ],
+      },
+    });
+
+    await expectAsync(buildPromise).toBeRejectedWithError(
+      "Error while processing directory blueprint 'src': Error while processing file blueprint 'index.js': Variable 'person' was not defined"
+    );
+
+    expect(fileWriter.createDirectory).not.toHaveBeenCalled();
+    expect(fileWriter.writeFile).not.toHaveBeenCalled();
+    expect(processSpy).toHaveBeenCalledWith("src", {});
+    expect(processSpy).toHaveBeenCalledWith("index.js", {});
+    expect(processSpy).toHaveBeenCalledWith("console.log('Hello $person');", {});
+  });
 });
