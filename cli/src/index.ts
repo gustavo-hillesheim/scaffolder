@@ -10,19 +10,14 @@ const command = new Command("scaffold");
 command.command("build <blueprintName>").action(diContainer.get(BuildCommand).execute);
 
 command
-  .command("create")
-  .command("blueprint <blueprintName>")
+  .command("createBlueprint <blueprintName>")
   .option("-t, --targetDirectory <targetDirectory>", "Target directory to create a blueprint for")
   .action(diContainer.get(CreateBlueprintCommand).execute);
 
-command
-  .command("list")
-  .command("blueprints")
-  .action(diContainer.get(ListBlueprintsCommand).execute);
+command.command("listBlueprints").action(diContainer.get(ListBlueprintsCommand).execute);
 
 command
-  .command("delete")
-  .command("blueprint <blueprintName>")
+  .command("deleteBlueprint <blueprintName>")
   .action(diContainer.get(DeleteBlueprintCommand).execute);
 
 command.parse(process.argv);
