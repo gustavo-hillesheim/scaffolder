@@ -1,4 +1,8 @@
-import { BlueprintService, ScaffoldingService } from "@gus_hill/scaffolding";
+import {
+  BlueprintProcessingError,
+  BlueprintService,
+  ScaffoldingService,
+} from "@gus_hill/scaffolding";
 
 export class BuildCommand {
   constructor(
@@ -6,39 +10,50 @@ export class BuildCommand {
     private scaffoldingService: ScaffoldingService
   ) {}
 
-  execute = async (blueprintName?: string) => {
-    if (!blueprintName) {
-      await this.listAvailableBlueprints();
+  execute = async (blueprintName: string, variables: string[]) => {
+    const variablesObj = this.createVariablesObj(variables);
+    const blueprintExists = this.blueprintService.blueprintExists(blueprintName);
+    if (!blueprintExists) {
+      console.log(`The blueprint '${blueprintName}' does not exist.`);
     } else {
-      const blueprintExists = this.blueprintService.blueprintExists(blueprintName);
-      if (!blueprintExists) {
-        console.log(`The blueprint '${blueprintName}' does not exist.`);
-      } else {
-        await this.buildBlueprint(blueprintName);
-      }
+      await this.buildBlueprint(blueprintName, variablesObj);
     }
   };
 
-  private async listAvailableBlueprints(): Promise<void> {
-    const blueprints = await this.blueprintService.listBlueprints();
-    console.log("No blueprint was informed.");
-    if (blueprints.length === 0) {
-      console.log(
-        "There is no blueprint available. Use the command 'create blueprint' in a directory to create a blueprint of it."
-      );
-    } else {
-      console.log("Available blueprints:");
-      blueprints.forEach((blueprint) => {
-        console.log(`- ${blueprint}`);
-      });
-    }
+  private createVariablesObj(variables: string[]): Record<string, string> {
+    const variablesObj: Record<string, string> = {};
+    variables.forEach((arg, index) => {
+      if (index === 0) {
+        return;
+      }
+      const lastArg = variables[index - 1];
+      if (lastArg.startsWith("--") && !arg.startsWith("--")) {
+        variablesObj[lastArg.substring(2)] = arg;
+      }
+    });
+    return variablesObj;
   }
 
-  private async buildBlueprint(blueprintName: string): Promise<void> {
-    console.log(`Building blueprint "${blueprintName}"`);
+  private async buildBlueprint(
+    blueprintName: string,
+    variables: Record<string, string>
+  ): Promise<void> {
+    console.log(`Building blueprint "${blueprintName}"...`);
     const blueprint = await this.blueprintService.loadBlueprint(blueprintName);
-    await this.scaffoldingService.build({
-      blueprint,
-    });
+    await this.scaffoldingService
+      .build({
+        blueprint,
+        variables,
+      })
+      .then(() => console.log("Bluprint built successfully!"))
+      .catch((error) => this.handleBuildError(blueprintName, error));
+  }
+
+  private handleBuildError(blueprintName: string, error: Error) {
+    const messagePrefix = `Error while building blueprint '${blueprintName}': `;
+    console.error(
+      messagePrefix +
+        (error instanceof BlueprintProcessingError ? error.shortMessage : error.message)
+    );
   }
 }

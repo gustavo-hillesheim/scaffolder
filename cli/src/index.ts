@@ -7,7 +7,10 @@ import { diContainer } from "./di";
 
 const command = new Command("scaffold");
 
-command.command("build <blueprintName>").action(diContainer.get(BuildCommand).execute);
+command
+  .command("build <blueprintName> [variables...]")
+  .allowUnknownOption(true)
+  .action(diContainer.get(BuildCommand).execute);
 
 command
   .command("saveBlueprint <blueprintName>")

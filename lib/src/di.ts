@@ -1,10 +1,14 @@
 import { MinimalDIContainer } from "minimal-di";
 
-import { FileReader, FileWriter } from "./components";
+import { FileReader, FileWriter, TemplateProcessor } from "./components";
 import { ScaffoldingService } from "./services";
 
-export const diContainer = new MinimalDIContainer();
+export const di = new MinimalDIContainer();
 
-diContainer.register(FileWriter, () => new FileWriter());
-diContainer.register(FileReader, () => new FileReader());
-diContainer.register(ScaffoldingService, () => new ScaffoldingService(diContainer.get(FileWriter)));
+di.register(TemplateProcessor, () => new TemplateProcessor());
+di.register(FileWriter, () => new FileWriter());
+di.register(FileReader, () => new FileReader());
+di.register(
+  ScaffoldingService,
+  () => new ScaffoldingService(di.get(FileWriter), di.get(TemplateProcessor))
+);
