@@ -1,11 +1,16 @@
 {
-  "name": "scaffolding-cli",
+  "name": "@gushill/scaffolding-cli",
   "version": "0.0.1",
   "description": "CLI for creating folders and files based off of a bluepring",
   "main": "src/index.ts",
   "license": "MIT",
+  "bin": {
+    "scaffold": "./bin/scaffold.js"
+  },
   "scripts": {
-    "cli": "ts-node src/index.ts"
+    "cli": "ts-node src/index.ts",
+    "build": "tsc",
+    "publish:local": "npm run build && npm unlink @gushill/scaffolding-cli && npm link"
   },
   "devDependencies": {
     "@types/node": "^15.0.2",
