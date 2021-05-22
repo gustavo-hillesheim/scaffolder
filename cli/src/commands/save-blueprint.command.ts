@@ -5,22 +5,33 @@ import {
   DirectoryBlueprint,
   FileReader,
   FSItem,
-  ProjectBlueprint,
 } from "@gus_hill/scaffolding";
 import { basename } from "path";
 
 export class SaveBlueprintCommand {
   constructor(private fileReader: FileReader, private blueprintService: BlueprintService) {}
 
-  execute = async (
-    blueprintName: string,
-    { targetDirectory, override }: CreateBlueprintOptions
-  ) => {
+  execute = async (blueprintName: string, options: SaveBlueprintCommandOptions) => {
+    let { targetDirectory, override } = options;
     targetDirectory = targetDirectory || process.cwd();
+    const canExecute = await this.verifyCanExecute({ targetDirectory, override, blueprintName });
+    if (canExecute) {
+      const directoryItems = await this.readDirectoryBlueprint(targetDirectory);
+      await this.saveBlueprint({ blueprintName, targetDirectory, override, directoryItems }).catch(
+        this.handleSaveError
+      );
+    }
+  };
+
+  private async verifyCanExecute({
+    targetDirectory,
+    override,
+    blueprintName,
+  }: VerifyCanExecuteParams): Promise<boolean> {
     const directoryExists = await this.fileReader.exists(targetDirectory);
     if (!directoryExists) {
-      console.log(`The directory '${targetDirectory}' does not exist`);
-      return;
+      console.log(`The directory '${targetDirectory}' does not exist.`);
+      return false;
     }
     const blueprintExists = await this.blueprintService.blueprintExists(blueprintName);
     if (blueprintExists) {
@@ -28,25 +39,12 @@ export class SaveBlueprintCommand {
         console.error(
           `Blueprint '${blueprintName}' already exists. Use the option '--override' to override an already existing blueprint.`
         );
-        return;
+        return false;
       } else {
         console.log(`Blueprint '${blueprintName}' already exists, overriding it...`);
       }
     }
-    const directoryItems = await this.readDirectoryBlueprint(targetDirectory);
-    await this.saveBlueprint(
-      blueprintName,
-      {
-        items: [
-          new DirectoryBlueprint(basename(targetDirectory), directoryItems.map(createBlueprint)),
-        ],
-      },
-      { override }
-    ).catch(this.handleSaveError);
-  };
-
-  private handleSaveError(error: Error): void {
-    console.error(`An error occurred while saving the blueprint: ${error.message}.`);
+    return true;
   }
 
   private async readDirectoryBlueprint(targetDirectory: string): Promise<FSItem[]> {
@@ -71,18 +69,44 @@ export class SaveBlueprintCommand {
     return total;
   }
 
-  private async saveBlueprint(
-    blueprintName: string,
-    blueprint: ProjectBlueprint,
-    { override }: { override?: boolean }
-  ): Promise<void> {
+  private async saveBlueprint({
+    blueprintName,
+    directoryItems,
+    override,
+    targetDirectory,
+  }: SaveBlueprintParams): Promise<void> {
     console.log(`Saving blueprint ${blueprintName}...`);
-    await this.blueprintService.saveBlueprint(blueprintName, blueprint, { override });
+    await this.blueprintService.saveBlueprint(
+      blueprintName,
+      {
+        items: [
+          new DirectoryBlueprint(basename(targetDirectory), directoryItems.map(createBlueprint)),
+        ],
+      },
+      { override }
+    );
     console.log("Blueprint saved!");
+  }
+
+  private handleSaveError(error: Error): void {
+    console.error(`An error occurred while saving the blueprint: ${error.message}.`);
   }
 }
 
-type CreateBlueprintOptions = {
+type VerifyCanExecuteParams = {
+  targetDirectory: string;
+  override?: boolean;
+  blueprintName: string;
+};
+
+type SaveBlueprintCommandOptions = {
   targetDirectory?: string;
+  override?: boolean;
+};
+
+type SaveBlueprintParams = {
+  blueprintName: string;
+  targetDirectory: string;
+  directoryItems: FSItem[];
   override?: boolean;
 };
