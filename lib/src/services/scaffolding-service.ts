@@ -1,5 +1,12 @@
 import { normalize, sep } from "path";
-import { Directory, ProjectBlueprint, FileBlueprint, DirectoryBlueprint, File } from "../types";
+import {
+  Directory,
+  ProjectBlueprint,
+  FileBlueprint,
+  DirectoryBlueprint,
+  File,
+  UnknownBlueprintTypeError,
+} from "../types";
 import { FileWriter } from "../components/file-writer";
 
 export class ScaffoldingService {
@@ -14,7 +21,7 @@ export class ScaffoldingService {
       } else if (item instanceof DirectoryBlueprint) {
         await this.buildDirectory(item, baseDirectory);
       } else {
-        throw new Error(`Unknown blueprint type: ${(item as any).constructor.name}`);
+        throw new UnknownBlueprintTypeError((item as any).constructor.name);
       }
     }
   }

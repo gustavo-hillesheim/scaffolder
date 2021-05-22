@@ -1,6 +1,11 @@
 import { basename, join } from "path";
 
-import { Directory, DirectoryBlueprint, ProjectBlueprint } from "../types";
+import {
+  Directory,
+  DirectoryBlueprint,
+  InexistingBlueprintError,
+  ProjectBlueprint,
+} from "../types";
 import { createBlueprint, createFsItem } from "../utils";
 import { FileWriter, FileReader } from "../components";
 
@@ -51,7 +56,7 @@ export class BlueprintService {
   private async ensureBlueprintExists(blueprintName: string): Promise<void> {
     const blueprintExists = await this.blueprintExists(blueprintName);
     if (!blueprintExists) {
-      throw new Error(`The blueprint '${blueprintName}' does not exist`);
+      throw new InexistingBlueprintError(blueprintName);
     }
   }
 }

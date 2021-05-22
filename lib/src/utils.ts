@@ -1,6 +1,15 @@
 import { basename, join } from "path";
 
-import { Blueprint, Directory, DirectoryBlueprint, File, FileBlueprint, FSItem } from "./types";
+import {
+  Blueprint,
+  Directory,
+  DirectoryBlueprint,
+  File,
+  FileBlueprint,
+  FSItem,
+  UnknownBlueprintTypeError,
+  UnknownFileTypeError,
+} from "./types";
 
 export function createBlueprint(fsItem: FSItem): Blueprint {
   if (fsItem instanceof File) {
@@ -8,7 +17,7 @@ export function createBlueprint(fsItem: FSItem): Blueprint {
   } else if (fsItem instanceof Directory) {
     return new DirectoryBlueprint(basename(fsItem.path), fsItem.children.map(createBlueprint));
   }
-  throw new Error(`Unknown file type: ${fsItem.constructor.name}`);
+  throw new UnknownFileTypeError(fsItem.constructor.name);
 }
 
 export function createFsItem<T extends Blueprint>(
@@ -27,7 +36,7 @@ export function createFsItem<T extends Blueprint>(
       (blueprint as FileBlueprint).content
     ) as FsItemMap<T>;
   }
-  throw new Error(`Unknown blueprint type: ${(blueprint as any).constructor.name}`);
+  throw new UnknownBlueprintTypeError(blueprint.constructor.name);
 }
 
 type FsItemMap<T extends Blueprint> = T extends DirectoryBlueprint ? Directory : File;
