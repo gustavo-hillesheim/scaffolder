@@ -14,6 +14,11 @@ export class CreateBlueprintCommand {
 
   execute = async (blueprintName: string, { targetDirectory }: CreateBlueprintOptions) => {
     targetDirectory = targetDirectory || process.cwd();
+    const directoryExists = await this.fileReader.exists(targetDirectory);
+    if (!directoryExists) {
+      console.log(`The directory '${targetDirectory}' does not exist`);
+      return;
+    }
     const directoryItems = await this.readDirectoryBlueprint(targetDirectory);
     await this.saveBlueprint(blueprintName, {
       items: [
