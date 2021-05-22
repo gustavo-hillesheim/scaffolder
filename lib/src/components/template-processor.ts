@@ -28,7 +28,7 @@ class TemplateProcessorDelegate {
   }
 
   private *findVariables(): Generator<VariablePlaceholderInfo> {
-    const variablesRegex = /\$(\w+)/g;
+    const variablesRegex = /\$([a-zA-Z]+)/g;
     let regexResult = variablesRegex.exec(this.template);
     while (regexResult) {
       yield {
