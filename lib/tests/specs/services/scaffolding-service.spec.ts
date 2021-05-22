@@ -6,15 +6,31 @@ import {
   Directory,
   DirectoryBlueprint,
   Blueprint,
+  TemplateProcessor,
 } from "../../../src";
 
 describe("ScaffoldingService", () => {
   let scaffolderService: ScaffoldingService;
-  let fileWriter: FileWriter;
+  let templateProcessor: TemplateProcessor;
+  let processSpy: jasmine.Spy<TemplateProcessor["process"]>;
+  let fileWriter: jasmine.SpyObj<FileWriter>;
 
   beforeEach(() => {
-    fileWriter = jasmine.createSpyObj("FileWriter", ["writeFile", "createDirectory"]);
-    scaffolderService = new ScaffoldingService(fileWriter);
+    fileWriter = jasmine.createSpyObj<FileWriter>("FileWriter", ["writeFile", "createDirectory"]);
+    templateProcessor = new TemplateProcessor();
+    processSpy = spyOn(templateProcessor, "process").and.callThrough();
+    scaffolderService = new ScaffoldingService(fileWriter, templateProcessor);
+  });
+
+  it("should create file with no content", async () => {
+    await scaffolderService.build({
+      blueprint: {
+        items: [new FileBlueprint("empty")],
+      },
+    });
+
+    expect(fileWriter.writeFile).toHaveBeenCalledWith(new File(`${process.cwd()}\\empty`, ""));
+    expect(processSpy).toHaveBeenCalledWith("empty", {});
   });
 
   it("should create simple file", async () => {
@@ -27,6 +43,8 @@ describe("ScaffoldingService", () => {
     expect(fileWriter.writeFile).toHaveBeenCalledWith(
       new File(`${process.cwd()}\\test.js`, 'console.log("Hello World!");')
     );
+    expect(processSpy).toHaveBeenCalledWith("test.js", {});
+    expect(processSpy).toHaveBeenCalledWith('console.log("Hello World!");', {});
   });
 
   it("should create file in specified directory", async () => {
@@ -40,6 +58,8 @@ describe("ScaffoldingService", () => {
     expect(fileWriter.writeFile).toHaveBeenCalledWith(
       new File("c:\\output\\test.cmd", 'echo "Hello World"')
     );
+    expect(processSpy).toHaveBeenCalledWith("test.cmd", {});
+    expect(processSpy).toHaveBeenCalledWith('echo "Hello World"', {});
   });
 
   it("should create folder in specified directory", async () => {
@@ -51,6 +71,7 @@ describe("ScaffoldingService", () => {
     });
 
     expect(fileWriter.createDirectory).toHaveBeenCalledWith(new Directory(`C:\\base_dir\\src`));
+    expect(processSpy).toHaveBeenCalledWith("src", {});
   });
 
   it("should create folder", async () => {
@@ -61,6 +82,7 @@ describe("ScaffoldingService", () => {
     });
 
     expect(fileWriter.createDirectory).toHaveBeenCalledWith(new Directory(`${process.cwd()}\\src`));
+    expect(processSpy).toHaveBeenCalledWith("src", {});
   });
 
   it("should create folder with nested folders/files", async () => {
@@ -94,6 +116,15 @@ describe("ScaffoldingService", () => {
         `${process.cwd()}\\scaffolderService\\package.json`,
         '{ "name": "scaffolderService", "version": "0.0.1", "main": "src/index.js" }'
       )
+    );
+    expect(processSpy).toHaveBeenCalledWith("scaffolderService", {});
+    expect(processSpy).toHaveBeenCalledWith("src", {});
+    expect(processSpy).toHaveBeenCalledWith("index.js", {});
+    expect(processSpy).toHaveBeenCalledWith('console.log("Hello World!");', {});
+    expect(processSpy).toHaveBeenCalledWith("package.json", {});
+    expect(processSpy).toHaveBeenCalledWith(
+      '{ "name": "scaffolderService", "version": "0.0.1", "main": "src/index.js" }',
+      {}
     );
   });
 

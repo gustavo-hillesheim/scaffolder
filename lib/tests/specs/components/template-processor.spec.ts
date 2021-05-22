@@ -15,10 +15,10 @@ describe("TemplateProcessor", () => {
   });
 
   it("should interpolate a Number variable", () => {
-    const result = templateProcessor.process("I'm a $number", {
+    const result = templateProcessor.process("I'm a $number value", {
       number: 10,
     });
-    expect(result).toEqual("I'm a 10");
+    expect(result).toEqual("I'm a 10 value");
   });
 
   it("should interpolate a Boolean variable", () => {
@@ -49,5 +49,10 @@ describe("TemplateProcessor", () => {
     expect(() => templateProcessor.process("$var", {})).toThrowError(
       "Variable 'var' was not defined"
     );
+  });
+
+  it("should return original String if no variable is found", () => {
+    const result = templateProcessor.process("I have no variables", {});
+    expect(result).toEqual("I have no variables");
   });
 });

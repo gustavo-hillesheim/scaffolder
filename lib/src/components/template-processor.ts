@@ -26,6 +26,7 @@ class TemplateProcessorDelegate {
         this.addVariableValueToResult(name);
       }
     }
+    this.result += this.template.substring(this.lastIndex);
     return this.result;
   }
 

@@ -8,9 +8,13 @@ import {
   UnknownBlueprintTypeError,
 } from "../types";
 import { FileWriter } from "../components/file-writer";
+import { TemplateProcessor } from "../components";
 
 export class ScaffoldingService {
-  constructor(private readonly fileWriter: FileWriter) {}
+  constructor(
+    private readonly fileWriter: FileWriter,
+    private readonly templateProcessor: TemplateProcessor
+  ) {}
 
   async build(buildDefinition: BuildDefinition): Promise<void> {
     const baseDirectory = this.getBaseDirectory(buildDefinition);
@@ -34,15 +38,20 @@ export class ScaffoldingService {
   }
 
   private async buildFile(file: FileBlueprint, baseDirectory: string): Promise<void> {
-    const finalFilePath = `${baseDirectory}${file.name}`;
-    await this.fileWriter.writeFile(new File(finalFilePath, file.content));
+    const processedFileName = this.templateProcessor.process(file.name, {});
+    const processedFileContent = file.content
+      ? this.templateProcessor.process(file.content, {})
+      : "";
+    const finalFilePath = `${baseDirectory}${processedFileName}`;
+    await this.fileWriter.writeFile(new File(finalFilePath, processedFileContent));
   }
 
   private async buildDirectory(
     directory: DirectoryBlueprint,
     baseDirectory: string
   ): Promise<void> {
-    const finalDirectoryPath = `${baseDirectory}${directory.name}`;
+    const processedDirectoryName = this.templateProcessor.process(directory.name, {});
+    const finalDirectoryPath = `${baseDirectory}${processedDirectoryName}`;
     await this.fileWriter.createDirectory(new Directory(finalDirectoryPath));
     await this.build({
       blueprint: {
