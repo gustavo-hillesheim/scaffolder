@@ -15,3 +15,9 @@ export class InexistingBlueprintError extends Error {
     super(`The blueprint '${blueprintName}' does not exist`);
   }
 }
+
+export class BlueprintAlreadyExistsError extends Error {
+  constructor(blueprintName: string) {
+    super(`Blueprint '${blueprintName}' already exists`);
+  }
+}

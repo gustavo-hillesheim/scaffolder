@@ -95,6 +95,34 @@ describe("BlueprintService", () => {
         ])
       );
     });
+
+    it("should throw error if the blueprint already exists", async () => {
+      fileReader.exists.and.returnValue(Promise.resolve(true));
+
+      const savePromise = blueprintService.saveBlueprint("test-blueprint", {
+        items: [new FileBlueprint("index.js", "console.log('Hello World!');")],
+      });
+
+      await expectAsync(savePromise).toBeRejected("Blueprint 'test-blueprint' already exists");
+      expect(fileReader.exists).toHaveBeenCalledOnceWith(join(rootDirectoryPath, "test-blueprint"));
+    });
+
+    it("should not throw error if the blueprint already exists and the override option is true", async () => {
+      fileReader.exists.and.returnValue(Promise.resolve(true));
+
+      const savePromise = blueprintService.saveBlueprint(
+        "test-blueprint",
+        {
+          items: [new FileBlueprint("index.js", "console.log('Hello World!');")],
+        },
+        {
+          override: true,
+        }
+      );
+
+      await expectAsync(savePromise).toBeResolved();
+      expect(fileReader.exists).toHaveBeenCalledOnceWith(join(rootDirectoryPath, "test-blueprint"));
+    });
   });
 
   describe("#blueprintExists", () => {
