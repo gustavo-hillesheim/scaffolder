@@ -1,26 +1,61 @@
 export class TemplateProcessor {
   process(template: string, variables: Record<string, string | number | boolean>): string {
-    const variablesRegex = /\$(\w+)/g;
-    let result = "";
-    let lastIndex = 0;
-    let regexResult = variablesRegex.exec(template);
-    while (regexResult) {
-      const variableName = regexResult[1];
-      const isScaped = regexResult.index > 0 ? template[regexResult.index - 1] === "\\" : false;
-      if (isScaped) {
-        result += template.substring(lastIndex, regexResult.index - 1);
-        result += `$${variableName}`;
-      } else {
-        result += template.substring(lastIndex, regexResult.index);
-        const variableValue = variables[variableName];
-        if (variableValue === undefined) {
-          throw new Error(`Variable '${variableName}' was not defined`);
-        }
-        result += variableValue;
-      }
-      lastIndex = variablesRegex.lastIndex;
-      regexResult = variablesRegex.exec(template);
-    }
-    return result;
+    return new TemplateProcessorDelegate(template, variables).process();
   }
 }
+
+class TemplateProcessorDelegate {
+  private result = "";
+  private lastIndex = 0;
+
+  constructor(
+    private template: string,
+    private variables: Record<string, string | number | boolean>
+  ) {}
+
+  process(): string {
+    for (const variable of this.findVariables()) {
+      const { name, index } = variable;
+      if (this.isScaped(variable)) {
+        const variablesGapWithoutScaping = this.template.substring(this.lastIndex, index - 1);
+        this.result += variablesGapWithoutScaping;
+        this.result += `$${name}`;
+      } else {
+        const variablesGap = this.template.substring(this.lastIndex, index);
+        this.result += variablesGap;
+        this.addVariableValueToResult(name);
+      }
+    }
+    return this.result;
+  }
+
+  private *findVariables(): Generator<VariablePlaceholderInfo> {
+    const variablesRegex = /\$(\w+)/g;
+    let regexResult = variablesRegex.exec(this.template);
+    while (regexResult) {
+      yield {
+        name: regexResult[1],
+        index: regexResult.index,
+      };
+      this.lastIndex = variablesRegex.lastIndex;
+      regexResult = variablesRegex.exec(this.template);
+    }
+  }
+
+  private isScaped({ index }: VariablePlaceholderInfo): boolean {
+    return index > 0 ? this.template[index - 1] === "\\" : false;
+  }
+
+  private addVariableValueToResult(variableName: string): void {
+    const variableValue = this.variables[variableName];
+    if (variableValue === undefined) {
+      throw new Error(`Variable '${variableName}' was not defined`);
+    }
+    this.result += variableValue;
+  }
+}
+
+type VariablePlaceholderInfo = {
+  name: string;
+  index: number;
+};
