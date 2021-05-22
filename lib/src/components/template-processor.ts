@@ -6,12 +6,18 @@ export class TemplateProcessor {
     let regexResult = variablesRegex.exec(template);
     while (regexResult) {
       const variableName = regexResult[1];
-      result += template.substring(lastIndex, regexResult.index);
-      const variableValue = variables[variableName];
-      if (variableValue === undefined) {
-        throw new Error(`Variable '${variableName}' was not defined`);
+      const isScaped = regexResult.index > 0 ? template[regexResult.index - 1] === "\\" : false;
+      if (isScaped) {
+        result += template.substring(lastIndex, regexResult.index - 1);
+        result += `$${variableName}`;
+      } else {
+        result += template.substring(lastIndex, regexResult.index);
+        const variableValue = variables[variableName];
+        if (variableValue === undefined) {
+          throw new Error(`Variable '${variableName}' was not defined`);
+        }
+        result += variableValue;
       }
-      result += variableValue;
       lastIndex = variablesRegex.lastIndex;
       regexResult = variablesRegex.exec(template);
     }

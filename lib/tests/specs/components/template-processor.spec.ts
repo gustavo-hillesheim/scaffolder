@@ -40,6 +40,11 @@ describe("TemplateProcessor", () => {
     expect(result).toEqual("");
   });
 
+  it("should not interpolate scaped $", () => {
+    const result = templateProcessor.process("\\$scope", {});
+    expect(result).toEqual("$scope");
+  });
+
   it("should throw error when interpolating a non-existing variable", () => {
     expect(() => templateProcessor.process("$var", {})).toThrowError(
       "Variable 'var' was not defined"
