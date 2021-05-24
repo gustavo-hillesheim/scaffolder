@@ -1,15 +1,21 @@
 import {
+  Blueprint,
   BlueprintService,
   createBlueprint,
   Directory,
   DirectoryBlueprint,
+  FileBlueprint,
   FileReader,
   FSItem,
 } from "@gus_hill/scaffolding";
 import { basename } from "path";
 
 export class SaveBlueprintCommand {
-  constructor(private fileReader: FileReader, private blueprintService: BlueprintService) {}
+  constructor(
+    private fileReader: FileReader,
+    private blueprintService: BlueprintService,
+    private resourceRootDir: string
+  ) {}
 
   execute = async (blueprintName: string, options: SaveBlueprintCommandOptions) => {
     let { targetDirectory, override } = options;
@@ -17,9 +23,15 @@ export class SaveBlueprintCommand {
     const canExecute = await this.verifyCanExecute({ targetDirectory, override, blueprintName });
     if (canExecute) {
       const directoryItems = await this.readDirectoryBlueprint(targetDirectory);
-      await this.saveBlueprint({ blueprintName, targetDirectory, override, directoryItems }).catch(
-        this.handleSaveError
-      );
+      const blueprintScript = await this.createBlueprintScript(blueprintName);
+      await this.saveBlueprint({
+        blueprintName,
+        override,
+        files: [
+          new DirectoryBlueprint(basename(targetDirectory), directoryItems.map(createBlueprint)),
+        ],
+        blueprintScript,
+      }).catch(this.handleSaveError);
     }
   };
 
@@ -58,6 +70,16 @@ export class SaveBlueprintCommand {
     return directoryBlueprint;
   }
 
+  private async createBlueprintScript(blueprintName: string): Promise<string> {
+    const blueprintScriptTemplate = await this.fileReader.readFile(
+      `${this.resourceRootDir}\\templates\\blueprintScript.js`
+    );
+    if (!blueprintScriptTemplate) {
+      throw new Error("Could not find blueprint script template, check your resources folder");
+    }
+    return blueprintScriptTemplate.replace("{blueprintName}", blueprintName);
+  }
+
   private calculateTotalFiles(files: FSItem[]): number {
     let total = 0;
     for (const file of files) {
@@ -71,16 +93,17 @@ export class SaveBlueprintCommand {
 
   private async saveBlueprint({
     blueprintName,
-    directoryItems,
+    files,
     override,
-    targetDirectory,
+    blueprintScript,
   }: SaveBlueprintParams): Promise<void> {
     console.log(`Saving blueprint ${blueprintName}...`);
     await this.blueprintService.saveBlueprint(
       blueprintName,
       {
         items: [
-          new DirectoryBlueprint(basename(targetDirectory), directoryItems.map(createBlueprint)),
+          new DirectoryBlueprint("files", files),
+          new FileBlueprint("script.js", blueprintScript),
         ],
       },
       { override }
@@ -106,7 +129,7 @@ type SaveBlueprintCommandOptions = {
 
 type SaveBlueprintParams = {
   blueprintName: string;
-  targetDirectory: string;
-  directoryItems: FSItem[];
+  files: Blueprint[];
+  blueprintScript: string;
   override?: boolean;
 };
