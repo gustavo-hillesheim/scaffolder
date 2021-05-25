@@ -36,7 +36,6 @@ export class BuildCommand {
     console.log(`Building blueprint "${blueprintName}"...`);
     const targetDirectory = process.cwd();
     const blueprintScriptPath = `${this.blueprintsRootDir}\\${blueprintName}\\script.js`;
-    console.log(`Executing ${blueprintScriptPath} with targetDirectory ${targetDirectory}`);
     execSync(`node ${blueprintScriptPath} ${targetDirectory}`, {
       stdio: "inherit",
     });
