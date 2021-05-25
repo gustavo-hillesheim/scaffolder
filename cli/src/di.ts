@@ -27,7 +27,7 @@ diContainer.register(FileWriter, () => createFileWriter());
 
 diContainer.register(
   BuildCommand,
-  () => new BuildCommand(diContainer.get(BlueprintService), diContainer.get(ScaffoldingService))
+  () => new BuildCommand(diContainer.get(BlueprintService), BLUEPRINTS_ROOT_DIR)
 );
 diContainer.register(
   ListBlueprintsCommand,

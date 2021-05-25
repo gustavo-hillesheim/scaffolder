@@ -1,10 +1,8 @@
-import { BlueprintService, ScaffoldingService } from "@gus_hill/scaffolding";
+import { BlueprintService } from "@gus_hill/scaffolding";
+import { execSync } from "child_process";
 
 export class BuildCommand {
-  constructor(
-    private blueprintService: BlueprintService,
-    private scaffoldingService: ScaffoldingService
-  ) {}
+  constructor(private blueprintService: BlueprintService, private blueprintsRootDir: string) {}
 
   execute = async (blueprintName?: string) => {
     if (!blueprintName) {
@@ -35,10 +33,12 @@ export class BuildCommand {
   }
 
   private async buildBlueprint(blueprintName: string): Promise<void> {
-    console.log(`Building blueprint "${blueprintName}"`);
-    const blueprint = await this.blueprintService.loadBlueprint(blueprintName);
-    await this.scaffoldingService.build({
-      blueprint,
+    console.log(`Building blueprint "${blueprintName}"...`);
+    const targetDirectory = process.cwd();
+    const blueprintScriptPath = `${this.blueprintsRootDir}\\${blueprintName}\\script.js`;
+    console.log(`Executing ${blueprintScriptPath} with targetDirectory ${targetDirectory}`);
+    execSync(`node ${blueprintScriptPath} ${targetDirectory}`, {
+      stdio: "inherit",
     });
   }
 }
