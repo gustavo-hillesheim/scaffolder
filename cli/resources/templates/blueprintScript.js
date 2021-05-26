@@ -1,29 +1,17 @@
 const { Command } = require("commander");
-const { blueprintService, scaffoldingService } = require("../../build");
-
-function parseArguments(args) {
-  const command = new Command("<outputDirectory>");
-  return command.parse(args);
-}
-
-async function buildBlueprint({ blueprintName, outputDirectory }) {
-  const blueprint = await blueprintService.loadBlueprint(blueprintName);
-  const files = blueprint.items.find((item) => item.name === "files").children;
-
-  await scaffoldingService.build({
-    blueprint: {
-      items: files,
-    },
-    outputDirectory,
-  });
-}
+const { buildBlueprint, parseVariables } = require("../../build/blueprint-script-utils");
 
 async function main(args) {
-  const parsedArgs = parseArguments(args);
+  const command = new Command("<outputDirectory>").allowUnknownOption(true).parse(args);
+  const blueprintName = "{blueprintName}";
+
   await buildBlueprint({
-    outputDirectory: parsedArgs.args[0],
-    blueprintName: "{blueprintName}",
-  });
+    outputDirectory: command.args[0],
+    blueprintName,
+    variables: parseVariables(command.args.slice(1)),
+  })
+    .then(() => console.log(`Built blueprint "${blueprintName}" successfully!`))
+    .catch((e) => console.error(`Error while building blueprint: ${e.message}`));
 }
 
-main(process.argv).catch((e) => console.error(`Error while building blueprint: ${e.message}`));
+main(process.argv);

@@ -1,6 +1,6 @@
-import { BlueprintService } from "@gus_hill/scaffolding";
 import { execSync } from "child_process";
 import { Command } from "commander";
+import { BlueprintService } from "@gus_hill/scaffolding";
 
 export class BuildCommand {
   constructor(private blueprintService: BlueprintService, private blueprintsRootDir: string) {}
