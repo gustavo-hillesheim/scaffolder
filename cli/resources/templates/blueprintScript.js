@@ -1,6 +1,5 @@
-const { BlueprintService, ScaffoldingService } = require("@gus_hill/scaffolding");
 const { Command } = require("commander");
-const { diContainer } = require("../../build/di");
+const { blueprintService, scaffoldingService } = require("../../build");
 
 function parseArguments(args) {
   const command = new Command("<outputDirectory>");
@@ -8,11 +7,9 @@ function parseArguments(args) {
 }
 
 async function buildBlueprint({ blueprintName, outputDirectory }) {
-  const blueprintService = diContainer.get(BlueprintService);
   const blueprint = await blueprintService.loadBlueprint(blueprintName);
   const files = blueprint.items.find((item) => item.name === "files").children;
 
-  const scaffoldingService = diContainer.get(ScaffoldingService);
   await scaffoldingService.build({
     blueprint: {
       items: files,
