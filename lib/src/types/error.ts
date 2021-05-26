@@ -47,7 +47,7 @@ export class BlueprintProcessingError extends AppError {
     let parentError = this.cause;
     let rootBlueprintPath = this.blueprintName;
     let rootBlueprintType = this.blueprintType;
-    let rootCause = new Error();
+    let rootCause = this.cause;
     while (parentError) {
       if (parentError instanceof BlueprintProcessingError) {
         rootBlueprintPath += "/" + parentError.blueprintName;
