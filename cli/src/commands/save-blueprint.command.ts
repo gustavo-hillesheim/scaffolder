@@ -22,18 +22,33 @@ export class SaveBlueprintCommand {
     targetDirectory = targetDirectory || process.cwd();
     const canExecute = await this.verifyCanExecute({ targetDirectory, override, blueprintName });
     if (canExecute) {
-      const directoryItems = await this.readDirectoryBlueprint(targetDirectory);
+      const blueprintFiles = await this.getBlueprintFiles({
+        targetDirectory,
+        addWrapper: options.wrapper,
+      });
       const blueprintScript = await this.createBlueprintScript(blueprintName);
       await this.saveBlueprint({
         blueprintName,
         override,
-        files: [
-          new DirectoryBlueprint(basename(targetDirectory), directoryItems.map(createBlueprint)),
-        ],
+        files: blueprintFiles,
         blueprintScript,
       }).catch(this.handleSaveError);
     }
   };
+
+  private async getBlueprintFiles({
+    targetDirectory,
+    addWrapper,
+  }: {
+    targetDirectory: string;
+    addWrapper: boolean;
+  }): Promise<Blueprint[]> {
+    const directoryItems = await this.readDirectoryBlueprint(targetDirectory);
+    const directoryItemsBlueprint = directoryItems.map(createBlueprint);
+    return addWrapper
+      ? [new DirectoryBlueprint(basename(targetDirectory), directoryItemsBlueprint)]
+      : directoryItemsBlueprint;
+  }
 
   private async verifyCanExecute({
     targetDirectory,
@@ -125,6 +140,7 @@ type VerifyCanExecuteParams = {
 type SaveBlueprintCommandOptions = {
   targetDirectory?: string;
   override?: boolean;
+  wrapper: boolean;
 };
 
 type SaveBlueprintParams = {
