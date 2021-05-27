@@ -1,7 +1,7 @@
 import { BlueprintProcessingError } from "../../../src";
 
 describe("BlueprintProcessingError", () => {
-  it("should create the shortMessage when the cause is a BlueprintProcessingError", () => {
+  it("should create the shortMessage when the cause is a nested BlueprintProcessingError", () => {
     const error = new BlueprintProcessingError(
       "src",
       "directory",
@@ -9,6 +9,13 @@ describe("BlueprintProcessingError", () => {
     );
     expect(error.shortMessage).toEqual(
       "Error while processing file blueprint at 'src/index.js': fake error"
+    );
+  });
+
+  it("should create the shortMessage when the cause is a BlueprintProcessingError", () => {
+    const error = new BlueprintProcessingError("src", "directory", new Error("fake error"));
+    expect(error.shortMessage).toEqual(
+      "Error while processing directory blueprint at 'src': fake error"
     );
   });
 });

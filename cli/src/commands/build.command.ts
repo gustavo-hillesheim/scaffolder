@@ -1,59 +1,32 @@
-import {
-  BlueprintProcessingError,
-  BlueprintService,
-  ScaffoldingService,
-} from "@gus_hill/scaffolding";
+import { execSync } from "child_process";
+import { Command } from "commander";
+import { BlueprintService } from "@gus_hill/scaffolding";
 
 export class BuildCommand {
-  constructor(
-    private blueprintService: BlueprintService,
-    private scaffoldingService: ScaffoldingService
-  ) {}
+  constructor(private blueprintService: BlueprintService, private blueprintsRootDir: string) {}
 
-  execute = async (blueprintName: string, variables: string[]) => {
-    const variablesObj = this.createVariablesObj(variables);
+  execute = async (blueprintName: string, _: Record<string, string>, command: Command) => {
     const blueprintExists = this.blueprintService.blueprintExists(blueprintName);
     if (!blueprintExists) {
       console.log(`The blueprint '${blueprintName}' does not exist.`);
     } else {
-      await this.buildBlueprint(blueprintName, variablesObj);
+      await this.buildBlueprint(blueprintName, command.args).catch(this.handleBuildError);
     }
   };
 
-  private createVariablesObj(variables: string[]): Record<string, string> {
-    const variablesObj: Record<string, string> = {};
-    variables.forEach((arg, index) => {
-      if (index === 0) {
-        return;
-      }
-      const lastArg = variables[index - 1];
-      if (lastArg.startsWith("--") && !arg.startsWith("--")) {
-        variablesObj[lastArg.substring(2)] = arg;
-      }
-    });
-    return variablesObj;
-  }
-
-  private async buildBlueprint(
-    blueprintName: string,
-    variables: Record<string, string>
-  ): Promise<void> {
+  private async buildBlueprint(blueprintName: string, commandArgs: string[]): Promise<void> {
     console.log(`Building blueprint "${blueprintName}"...`);
-    const blueprint = await this.blueprintService.loadBlueprint(blueprintName);
-    await this.scaffoldingService
-      .build({
-        blueprint,
-        variables,
-      })
-      .then(() => console.log("Bluprint built successfully!"))
-      .catch((error) => this.handleBuildError(blueprintName, error));
+    const targetDirectory = process.cwd();
+    const blueprintScriptPath = `${this.blueprintsRootDir}\\${blueprintName}\\script.js`;
+    execSync(`node ${blueprintScriptPath} ${targetDirectory} ${commandArgs.slice(1).join(" ")}`, {
+      stdio: "inherit",
+    });
   }
 
-  private handleBuildError(blueprintName: string, error: Error) {
-    const messagePrefix = `Error while building blueprint '${blueprintName}': `;
-    console.error(
-      messagePrefix +
-        (error instanceof BlueprintProcessingError ? error.shortMessage : error.message)
-    );
+  private handleBuildError(e: Error): void {
+    if (e.message.startsWith("Command failed")) {
+      return;
+    }
+    console.error(`An error occurred while trying to execute the bluprint script: ${e.message}`);
   }
 }
