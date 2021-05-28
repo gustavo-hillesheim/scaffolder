@@ -22,8 +22,10 @@ export class SaveBlueprintCommand {
     targetDirectory = targetDirectory || process.cwd();
     const canExecute = await this.verifyCanExecute({ targetDirectory, override, blueprintName });
     if (canExecute) {
+      const ignoreRegex = options.ignore ? this.parseIgnoreRegex(options.ignore) : undefined;
       const blueprintFiles = await this.getBlueprintFiles({
         targetDirectory,
+        ignoreRegex,
         addWrapper: options.wrapper,
       });
       const blueprintScript = await this.createBlueprintScript(blueprintName);
@@ -35,20 +37,6 @@ export class SaveBlueprintCommand {
       }).catch(this.handleSaveError);
     }
   };
-
-  private async getBlueprintFiles({
-    targetDirectory,
-    addWrapper,
-  }: {
-    targetDirectory: string;
-    addWrapper: boolean;
-  }): Promise<Blueprint[]> {
-    const directoryItems = await this.readDirectoryBlueprint(targetDirectory);
-    const directoryItemsBlueprint = directoryItems.map(createBlueprint);
-    return addWrapper
-      ? [new DirectoryBlueprint(basename(targetDirectory), directoryItemsBlueprint)]
-      : directoryItemsBlueprint;
-  }
 
   private async verifyCanExecute({
     targetDirectory,
@@ -74,10 +62,44 @@ export class SaveBlueprintCommand {
     return true;
   }
 
-  private async readDirectoryBlueprint(targetDirectory: string): Promise<FSItem[]> {
+  private parseIgnoreRegex(ignoreRegex: string): RegExp {
+    if (!ignoreRegex.includes("/")) {
+      return new RegExp(ignoreRegex);
+    }
+    const regexPartsRegex = /\/(.+)\/([gim]*)/;
+    const matches = regexPartsRegex.exec(ignoreRegex);
+    if (!matches) {
+      throw new Error("Invalid ignore regex");
+    }
+    const regexStr = matches[1];
+    const regexModifiers = matches[2];
+    return new RegExp(regexStr, regexModifiers);
+  }
+
+  private async getBlueprintFiles({
+    targetDirectory,
+    addWrapper,
+    ignoreRegex,
+  }: {
+    targetDirectory: string;
+    addWrapper: boolean;
+    ignoreRegex?: RegExp;
+  }): Promise<Blueprint[]> {
+    const directoryItems = await this.readDirectoryBlueprint(targetDirectory, ignoreRegex);
+    const directoryItemsBlueprint = directoryItems.map(createBlueprint);
+    return addWrapper
+      ? [new DirectoryBlueprint(basename(targetDirectory), directoryItemsBlueprint)]
+      : directoryItemsBlueprint;
+  }
+
+  private async readDirectoryBlueprint(
+    targetDirectory: string,
+    ignoreRegex?: RegExp
+  ): Promise<FSItem[]> {
     console.log(`Reading files of directory ${targetDirectory}...`);
     const directoryBlueprint = await this.fileReader.readAll(targetDirectory, {
       recursive: true,
+      ignore: ignoreRegex,
     });
     console.log(
       `Read a total of ${this.calculateTotalFiles(directoryBlueprint)} files/directories!`
@@ -140,6 +162,7 @@ type VerifyCanExecuteParams = {
 type SaveBlueprintCommandOptions = {
   targetDirectory?: string;
   override?: boolean;
+  ignore?: string;
   wrapper: boolean;
 };
 
@@ -148,4 +171,5 @@ type SaveBlueprintParams = {
   files: Blueprint[];
   blueprintScript: string;
   override?: boolean;
+  ignore?: string;
 };
