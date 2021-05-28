@@ -5,20 +5,28 @@ import { BlueprintService } from "@gus_hill/scaffolding";
 export class BuildCommand {
   constructor(private blueprintService: BlueprintService, private blueprintsRootDir: string) {}
 
-  execute = async (blueprintName: string, _: Record<string, string>, command: Command) => {
+  execute = async (blueprintName: string, options: BuildCommandOptions, command: Command) => {
     const blueprintExists = this.blueprintService.blueprintExists(blueprintName);
     if (!blueprintExists) {
       console.log(`The blueprint '${blueprintName}' does not exist.`);
     } else {
-      await this.buildBlueprint(blueprintName, command.args).catch(this.handleBuildError);
+      const outputDirectory = options.output || process.cwd();
+      await this.buildBlueprint({
+        blueprintName,
+        outputDirectory,
+        commandArgs: command.args,
+      }).catch(this.handleBuildError);
     }
   };
 
-  private async buildBlueprint(blueprintName: string, commandArgs: string[]): Promise<void> {
+  private async buildBlueprint({
+    blueprintName,
+    commandArgs,
+    outputDirectory,
+  }: BuildBlueprintParams): Promise<void> {
     console.log(`Building blueprint "${blueprintName}"...`);
-    const targetDirectory = process.cwd();
     const blueprintScriptPath = `${this.blueprintsRootDir}\\${blueprintName}\\script.js`;
-    execSync(`node ${blueprintScriptPath} ${targetDirectory} ${commandArgs.slice(1).join(" ")}`, {
+    execSync(`node ${blueprintScriptPath} ${outputDirectory} ${commandArgs.slice(1).join(" ")}`, {
       stdio: "inherit",
     });
   }
@@ -30,3 +38,13 @@ export class BuildCommand {
     console.error(`An error occurred while trying to execute the bluprint script: ${e.message}`);
   }
 }
+
+type BuildBlueprintParams = {
+  blueprintName: string;
+  commandArgs: string[];
+  outputDirectory: string;
+};
+
+type BuildCommandOptions = {
+  output?: string;
+};

@@ -11,6 +11,7 @@ function runCli(args: string[]) {
 
   command
     .command("build <blueprintName>")
+    .option("-o, --output <output>", "Directory in which the blueprint will be built")
     .allowUnknownOption(true)
     .action(diContainer.get(BuildCommand).execute);
 
