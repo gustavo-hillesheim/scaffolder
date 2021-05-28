@@ -9,7 +9,7 @@ export class FileReader {
   }
 
   async listAll(directoryPath: string, options: ListOptions = {}): Promise<FSItem[]> {
-    const files = await this.listDirectoryFiles(normalize(directoryPath));
+    const files = await this.listDirectoryFiles(normalize(directoryPath), options.ignore);
     const output = [];
     for (const file of files) {
       if (file instanceof Directory && options.recursive) {
@@ -52,22 +52,31 @@ export class FileReader {
     return filesWithContent;
   }
 
-  private async listDirectoryFiles(directoryPath: string): Promise<FSItem[]> {
+  private async listDirectoryFiles(directoryPath: string, ignore?: RegExp): Promise<FSItem[]> {
     const files = await promises.readdir(directoryPath, {
       encoding: "utf8",
       withFileTypes: true,
     });
-    return files.map((file) =>
-      file.isFile()
-        ? new File(`${directoryPath}${sep}${file.name}`)
-        : new Directory(`${directoryPath}${sep}${file.name}`)
-    );
+    return files
+      .filter((file) => {
+        if (ignore) {
+          return !ignore.test(file.name);
+        }
+        return true;
+      })
+      .map((file) =>
+        file.isFile()
+          ? new File(`${directoryPath}${sep}${file.name}`)
+          : new Directory(`${directoryPath}${sep}${file.name}`)
+      );
   }
 }
 type ReadOptions = {
   recursive?: boolean;
+  ignore?: RegExp;
 };
 
 type ListOptions = {
   recursive?: boolean;
+  ignore?: RegExp;
 };

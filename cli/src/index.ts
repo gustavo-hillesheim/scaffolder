@@ -28,6 +28,10 @@ function runCli(args: string[]) {
         "If this option is not specified, the directory being saved will be added to the blueprint, otherwise, only the content will be added",
       false
     )
+    .option(
+      "-i, --ignore <ignoreRegex>",
+      "Regex that will be validated against each file name being read, if the file passes, it will be ignored and not added to the blueprint"
+    )
     .action(diContainer.get(SaveBlueprintCommand).execute);
 
   command.command("listBlueprints").action(diContainer.get(ListBlueprintsCommand).execute);

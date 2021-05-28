@@ -1,6 +1,5 @@
 import { sep } from "path";
 import { Directory, File, FileReader } from "../../../src";
-import { expectFileAt } from "../../utils";
 import { RESOURCES_FOLDER } from "../constants";
 
 describe("FileReader", () => {
@@ -50,6 +49,54 @@ describe("FileReader", () => {
     it("should throw error when listing non-existing directory", async () => {
       await expectAsync(fileReader.listAll(pathToResource("non_existing_dir"))).toBeRejected();
     });
+
+    it("should ignore files by extension", async () => {
+      const files = await fileReader.listAll(sampleDirPath, {
+        recursive: true,
+        ignore: /.txt$/,
+      });
+      expect(files).toEqual([
+        new Directory(pathToResource("sample_dir", "empty_dir")),
+        new Directory(pathToResource("sample_dir", "internal_dir")),
+      ]);
+    });
+
+    it("should ignore directory by name", async () => {
+      const files = await fileReader.listAll(sampleDirPath, {
+        recursive: true,
+        ignore: /internal_dir/,
+      });
+      expect(files).toEqual([
+        new Directory(pathToResource("sample_dir", "empty_dir")),
+        new File(pathToResource("sample_dir", "empty_file.txt")),
+        new File(pathToResource("sample_dir", "sample_file.txt")),
+      ]);
+    });
+
+    it("should ignore file by name", async () => {
+      const files = await fileReader.listAll(sampleDirPath, {
+        recursive: true,
+        ignore: /empty_file.txt/,
+      });
+      expect(files).toEqual([
+        new Directory(pathToResource("sample_dir", "empty_dir")),
+        new Directory(pathToResource("sample_dir", "internal_dir"), [
+          new File(pathToResource("sample_dir", "internal_dir", "internal_file.txt")),
+        ]),
+        new File(pathToResource("sample_dir", "sample_file.txt")),
+      ]);
+    });
+
+    it("should ignore files by name containing", async () => {
+      const files = await fileReader.listAll(sampleDirPath, {
+        recursive: true,
+        ignore: /file/,
+      });
+      expect(files).toEqual([
+        new Directory(pathToResource("sample_dir", "empty_dir")),
+        new Directory(pathToResource("sample_dir", "internal_dir")),
+      ]);
+    });
   });
 
   describe("#readAll", () => {
@@ -78,6 +125,17 @@ describe("FileReader", () => {
           ),
         ]),
         new File(pathToResource("sample_dir", "sample_file.txt"), "This is a Sample File"),
+      ]);
+    });
+
+    it("should read all directories and sub-directories and ignore files", async () => {
+      const files = await fileReader.readAll(sampleDirPath, {
+        recursive: true,
+        ignore: /.txt$/,
+      });
+      expect(files).toEqual([
+        new Directory(pathToResource("sample_dir", "empty_dir")),
+        new Directory(pathToResource("sample_dir", "internal_dir")),
       ]);
     });
 
