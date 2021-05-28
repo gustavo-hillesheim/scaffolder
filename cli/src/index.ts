@@ -21,6 +21,12 @@ function runCli(args: string[]) {
       "-o, --override",
       "Flag indicating that if the blueprint already exists, it should be overwritten"
     )
+    .option(
+      "-nw, --no-wrapper",
+      "Flag indicating that should not add wrapping directory to the blueprint. " +
+        "If this option is not specified, the directory being saved will be added to the blueprint, otherwise, only the content will be added",
+      false
+    )
     .action(diContainer.get(SaveBlueprintCommand).execute);
 
   command.command("listBlueprints").action(diContainer.get(ListBlueprintsCommand).execute);
