@@ -144,7 +144,7 @@ export class SaveBlueprintCommand {
   private insertVariablesInString(stringValue: string, variables: Record<string, string>): string {
     Object.keys(variables).forEach((variableName) => {
       const valueToReplace = variables[variableName];
-      stringValue = stringValue.replace(valueToReplace, `$${variableName}`);
+      stringValue = stringValue.replace(new RegExp(valueToReplace, "g"), `$${variableName}`);
     });
     return stringValue;
   }
