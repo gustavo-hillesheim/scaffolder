@@ -10,16 +10,25 @@
   "scripts": {
     "cli": "ts-node src/index.ts",
     "build": "tsc",
+    "test": "ts-node node_modules/jasmine/bin/jasmine --config=jasmine.json",
+    "test:watch": "nodemon --watch src --watch specs --exec \"npm run test\" -e ts",
+    "coverage": "nyc -r text -e .ts --include src -x \"**/*.spec.ts\" -x \"src/di.ts\" -x \"src/index.ts\" npm run test",
     "publish:local": "npm run build && npm unlink @gushill/scaffolding-cli && npm link"
   },
   "devDependencies": {
+    "@types/jasmine": "^3.7.6",
     "@types/node": "^15.0.2",
+    "jasmine": "^3.7.0",
+    "jasmine-node": "^3.0.0",
+    "nodemon": "^2.0.7",
+    "nyc": "^15.1.0",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.4"
   },
   "dependencies": {
     "@gus_hill/scaffolding": "file:../lib/build",
     "commander": "^7.2.0",
-    "minimal-di": "^1.0.1"
+    "minimal-di": "^1.0.1",
+    "open-file-explorer": "^1.0.2"
   }
 }

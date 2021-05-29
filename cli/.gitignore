@@ -5,3 +5,4 @@ sample_project_js
 sample_project_dart
 build
 .vscode
+.nyc_output
