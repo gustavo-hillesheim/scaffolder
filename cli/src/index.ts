@@ -33,6 +33,7 @@ function runCli(args: string[]) {
       "-i, --ignore <ignoreRegex>",
       "Regex that will be validated against each file name being read, if the file passes, it will be ignored and not added to the blueprint"
     )
+    .option("-v, --variables <variables...>")
     .action(diContainer.get(SaveBlueprintCommand).execute);
 
   command.command("listBlueprints").action(diContainer.get(ListBlueprintsCommand).execute);

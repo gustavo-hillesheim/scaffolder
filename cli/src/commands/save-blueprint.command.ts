@@ -18,16 +18,20 @@ export class SaveBlueprintCommand {
   ) {}
 
   execute = async (blueprintName: string, options: SaveBlueprintCommandOptions) => {
-    let { targetDirectory, override } = options;
+    let targetDirectory = options.targetDirectory;
+    const override = options.override;
+    const variables = this.parseVariables(options.variables);
     targetDirectory = targetDirectory || process.cwd();
     const canExecute = await this.verifyCanExecute({ targetDirectory, override, blueprintName });
     if (canExecute) {
       const ignoreRegex = options.ignore ? this.parseIgnoreRegex(options.ignore) : undefined;
-      const blueprintFiles = await this.getBlueprintFiles({
-        targetDirectory,
-        ignoreRegex,
-        addWrapper: options.wrapper,
-      });
+      const blueprintFiles = (
+        await this.getBlueprintFiles({
+          targetDirectory,
+          ignoreRegex,
+          addWrapper: options.wrapper,
+        })
+      ).map((blueprintFile) => this.insertVariables(blueprintFile, variables));
       const blueprintScript = await this.createBlueprintScript(blueprintName);
       await this.saveBlueprint({
         blueprintName,
@@ -37,6 +41,35 @@ export class SaveBlueprintCommand {
       }).catch(this.handleSaveError);
     }
   };
+
+  private parseVariables(variables?: string[]): Record<string, string> {
+    const variablesObj: Record<string, string> = {};
+    variables
+      ?.map((variable) => {
+        if (!variable.startsWith("$") || !variable.includes("=")) {
+          throw new Error(
+            `Invalid variable definition "${variable}", example definition: $var=value-to-replace`
+          );
+        }
+        return variable;
+      })
+      .map((variable) => {
+        const segments = variable.split("=");
+        const variableName = segments[0].substring(1);
+        const valueToReplace = segments[1];
+        return { variable, variableName, valueToReplace };
+      })
+      .forEach(({ variable, variableName, valueToReplace }) => {
+        if (!variableName) {
+          throw new Error(`A variable name was not specified at "${variable}"`);
+        }
+        if (!valueToReplace) {
+          throw new Error(`A value to replace was not specified at "${variable}"`);
+        }
+        variablesObj[variableName] = valueToReplace;
+      });
+    return variablesObj;
+  }
 
   private async verifyCanExecute({
     targetDirectory,
@@ -90,6 +123,30 @@ export class SaveBlueprintCommand {
     return addWrapper
       ? [new DirectoryBlueprint(basename(targetDirectory), directoryItemsBlueprint)]
       : directoryItemsBlueprint;
+  }
+
+  private insertVariables(blueprintFile: Blueprint, variables: Record<string, string>): Blueprint {
+    if (blueprintFile instanceof FileBlueprint) {
+      return new FileBlueprint(
+        this.insertVariablesInString(blueprintFile.name, variables),
+        blueprintFile.content
+          ? this.insertVariablesInString(blueprintFile.content, variables)
+          : undefined
+      );
+    } else {
+      return new DirectoryBlueprint(
+        this.insertVariablesInString(blueprintFile.name, variables),
+        blueprintFile.children?.map((child) => this.insertVariables(child, variables))
+      );
+    }
+  }
+
+  private insertVariablesInString(stringValue: string, variables: Record<string, string>): string {
+    Object.keys(variables).forEach((variableName) => {
+      const valueToReplace = variables[variableName];
+      stringValue = stringValue.replace(valueToReplace, `$${variableName}`);
+    });
+    return stringValue;
   }
 
   private async readDirectoryBlueprint(
@@ -163,6 +220,7 @@ type SaveBlueprintCommandOptions = {
   targetDirectory?: string;
   override?: boolean;
   ignore?: string;
+  variables?: string[];
   wrapper: boolean;
 };
 
