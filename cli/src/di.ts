@@ -9,11 +9,13 @@ import {
   ScaffoldingService,
 } from "@gus_hill/scaffolding";
 import { MinimalDIContainer } from "minimal-di";
+import openWithExplorer from "open-file-explorer";
 import { normalize } from "path";
 import { BuildCommand } from "./commands/build.command";
 import { SaveBlueprintCommand } from "./commands/save-blueprint.command";
 import { DeleteBlueprintCommand } from "./commands/delete-blueprint.command";
 import { ListBlueprintsCommand } from "./commands/list-blueprints.command";
+import { OpenBlueprintCommand } from "./commands/open-blueprint.command";
 
 const RESOURCES_ROOT_DIR = normalize(__dirname + "\\..\\resources");
 const BLUEPRINTS_ROOT_DIR = normalize(__dirname + "\\..\\blueprints");
@@ -46,3 +48,6 @@ diContainer.register(
   DeleteBlueprintCommand,
   () => new DeleteBlueprintCommand(diContainer.get(BlueprintService))
 );
+diContainer.register(OpenBlueprintCommand, () => {
+  return new OpenBlueprintCommand(openWithExplorer, BLUEPRINTS_ROOT_DIR);
+});

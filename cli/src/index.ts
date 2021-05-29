@@ -5,6 +5,7 @@ import { SaveBlueprintCommand } from "./commands/save-blueprint.command";
 import { DeleteBlueprintCommand } from "./commands/delete-blueprint.command";
 import { ListBlueprintsCommand } from "./commands/list-blueprints.command";
 import { diContainer } from "./di";
+import { OpenBlueprintCommand } from "./commands/open-blueprint.command";
 
 function runCli(args: string[]) {
   const command = new Command("scaffold");
@@ -39,6 +40,10 @@ function runCli(args: string[]) {
   command
     .command("deleteBlueprint <blueprintName>")
     .action(diContainer.get(DeleteBlueprintCommand).execute);
+
+  command
+    .command("openBlueprint <blueprintName>")
+    .action(diContainer.get(OpenBlueprintCommand).execute);
 
   command.parse(args);
 }
